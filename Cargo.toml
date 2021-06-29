@@ -1,0 +1,9 @@
+[package]
+name = "at2-web"
+version = "0.1.0"
+authors = ["Valérian Rousset <tharvik@users.noreply.github.com>"]
+edition = "2018"
+license = "AGPL-3.0-only"
+
+[dependencies]
+yew = "0.18"
