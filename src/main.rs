@@ -26,6 +26,8 @@ impl Component for App {
 
     fn view(&self) -> Html {
         html! { <>
+            <style> { include_str!(concat!(env!("OUT_DIR"), "/c4dt.css")) } </style>
+
             <pages::Style/>
             <pages::Pages />
         </> }
