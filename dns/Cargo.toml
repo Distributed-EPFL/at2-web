@@ -1,0 +1,20 @@
+[package]
+name = "dns"
+version = "0.1.0"
+authors = ["Valérian Rousset <tharvik@users.noreply.github.com>"]
+edition = "2018"
+license = "AGPL-3.0-only"
+
+[dependencies]
+drop = { git = "https://github.com/Distributed-EPFL/drop.git" }
+bincode = "1"
+prost = "0.8"
+snafu = "0.6"
+structopt = "0.3"
+tokio = { version = "1", features = ["macros", "net", "rt-multi-thread", "sync"] }
+tonic = "0.5"
+tracing = "0.1"
+tracing-fmt = "0.1"
+
+[build-dependencies]
+tonic-build = "0.5"

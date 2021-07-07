@@ -1,0 +1,23 @@
+syntax = "proto3";
+package dns;
+
+service DNS {
+	rpc Put (PutRequest) returns (PutReply);
+	rpc GetAll (GetAllRequest) returns (GetAllReply);
+}
+
+message Account {
+	bytes public_key = 1;
+	string name = 2;
+}
+
+message PutRequest {
+	Account account = 1;
+	bytes signature = 2;
+}
+message PutReply {}
+
+message GetAllRequest {}
+message GetAllReply {
+	repeated Account accounts = 1;
+}
