@@ -1,0 +1,73 @@
+name: deployement
+
+on:
+  workflow_run:
+    workflows: [CI]
+    branches: [main]
+    types: [completed]
+
+env:
+  DEPLOY_USER: at2
+  DEPLOY_HOST: srv1.c4dt.org
+
+jobs:
+  deploy-dns:
+    name: deploy DNS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - uses: Swatinem/rust-cache@v1
+
+      - uses: actions-rs/cargo@v1
+        name: cargo build
+        with:
+          command: build
+          args: --release --bin dns
+
+      - uses: kielabokkie/ssh-key-and-known-hosts-action@v1.2.0
+        with:
+          ssh-host: ${{ env.DEPLOY_HOST }}
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: rsync repository
+        run: >
+          rsync --verbose --archive --delete "$GITHUB_WORKSPACE/target/release/dns"
+          "${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:dns"
+
+  deploy-web:
+    name: deploy website
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v1
+
+      - uses: actions-rs/cargo@v1
+        name: cargo install trunk wasm-bindgen-cli
+        with:
+          command: install
+          args: trunk wasm-bindgen-cli
+
+      - run: trunk build --release web/index.html
+
+      - uses: kielabokkie/ssh-key-and-known-hosts-action@v1.2.0
+        with:
+          ssh-host: ${{ env.DEPLOY_HOST }}
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: rsync repository
+        run: >
+          rsync --verbose --archive --delete "$GITHUB_WORKSPACE/web/dist/"
+          "${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:web"
