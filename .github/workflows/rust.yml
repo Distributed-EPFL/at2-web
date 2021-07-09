@@ -1,10 +1,9 @@
+name: integration
+
 on: [push, pull_request]
 
-name: CI
-
 jobs:
-  check:
-    name: unit tests
+  unit-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -13,7 +12,6 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-          target: wasm32-unknown-unknown
 
       - uses: Swatinem/rust-cache@v1
 
@@ -22,8 +20,7 @@ jobs:
         with:
           command: test
 
-  deny:
-    name: check & clippy & deny
+  checks:
     runs-on: ubuntu-latest
 
     steps:
@@ -49,3 +46,41 @@ jobs:
 
       - uses: EmbarkStudios/cargo-deny-action@v1
         name: cargo deny
+
+  build-dns:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - uses: Swatinem/rust-cache@v1
+
+      - uses: actions-rs/cargo@v1
+        name: cargo build
+        with:
+          command: build
+
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v1
+
+      - uses: actions-rs/cargo@v1
+        name: cargo install trunk wasm-bindgen-cli
+        with:
+          command: install
+          args: trunk wasm-bindgen-cli
+
+      - run: trunk build web/index.html
