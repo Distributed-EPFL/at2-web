@@ -62,6 +62,9 @@ jobs:
 
       - run: trunk build --release web/index.html
 
+      - name: FIXME patch thedodd/trunk#196
+        run: sed -e s,\"/index-,\"index-,g -e s,\'/index-,\'./index-, -e s,\'/index-,\'index-, -i web/dist/index.html
+
       - uses: kielabokkie/ssh-key-and-known-hosts-action@v1.2.0
         with:
           ssh-host: ${{ env.DEPLOY_HOST }}
