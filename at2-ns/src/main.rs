@@ -36,7 +36,7 @@ async fn run(address: SocketAddr) -> Result<(), Error> {
     let service = rpc::Service::new();
 
     Server::builder()
-        .add_service(proto::dns_server::DnsServer::new(service))
+        .add_service(proto::name_service_server::NameServiceServer::new(service))
         .serve(address)
         .await
         .context(Rpc)?;

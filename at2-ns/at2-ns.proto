@@ -1,7 +1,7 @@
 syntax = "proto3";
-package dns;
+package at2_ns;
 
-service DNS {
+service NameService {
 	rpc Put (PutRequest) returns (PutReply);
 	rpc GetAll (GetAllRequest) returns (GetAllReply);
 }

@@ -1,2 +1,2 @@
 [workspace]
-members = ["dns", "web"]
+members = ["at2-ns", "web"]

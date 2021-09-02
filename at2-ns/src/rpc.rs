@@ -40,7 +40,7 @@ impl From<accounts::Error> for tonic::Status {
 }
 
 #[tonic::async_trait]
-impl proto::dns_server::Dns for Service {
+impl proto::name_service_server::NameService for Service {
     async fn put(
         &self,
         request: tonic::Request<proto::PutRequest>,

@@ -1,5 +1,5 @@
 [package]
-name = "dns"
+name = "at2-ns"
 version = "0.1.0"
 authors = ["Valérian Rousset <tharvik@users.noreply.github.com>"]
 edition = "2018"

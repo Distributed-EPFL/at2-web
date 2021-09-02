@@ -11,8 +11,8 @@ env:
   DEPLOY_HOST: srv1.c4dt.org
 
 jobs:
-  deploy-dns:
-    name: deploy DNS
+  deploy-ns:
+    name: deploy AT2's name service
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -28,7 +28,7 @@ jobs:
         name: cargo build
         with:
           command: build
-          args: --release --bin dns
+          args: --release
 
       - uses: kielabokkie/ssh-key-and-known-hosts-action@v1.2.0
         with:
@@ -37,8 +37,8 @@ jobs:
 
       - name: rsync repository
         run: >
-          rsync --verbose --archive --delete "$GITHUB_WORKSPACE/target/release/dns"
-          "${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:dns"
+          rsync --verbose --archive --delete "$GITHUB_WORKSPACE/target/release/at2-ns"
+          "${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:at2-ns"
 
   deploy-web:
     name: deploy website

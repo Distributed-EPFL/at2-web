@@ -2,7 +2,7 @@
 After=network.target
 
 [Service]
-ExecStart=%h/bin/dns
+ExecStart=%h/bin/at2-ns
 Restart=on-failure
 
 [Install]
