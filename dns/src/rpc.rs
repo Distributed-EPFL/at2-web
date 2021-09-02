@@ -1,8 +1,10 @@
 use drop::crypto::sign;
 use snafu::{OptionExt, ResultExt};
 
-use super::accounts::{self, Accounts};
-use super::proto;
+use super::{
+    accounts::{self, Accounts},
+    proto,
+};
 
 #[derive(snafu::Snafu, Debug)]
 pub enum ProtoError {
@@ -38,7 +40,7 @@ impl From<accounts::Error> for tonic::Status {
 }
 
 #[tonic::async_trait]
-impl proto::Dns for Service {
+impl proto::dns_server::Dns for Service {
     async fn put(
         &self,
         request: tonic::Request<proto::PutRequest>,

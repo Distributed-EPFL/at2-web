@@ -1,0 +1,9 @@
+[Unit]
+After=network.target
+
+[Service]
+ExecStart=%h/bin/dns
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
