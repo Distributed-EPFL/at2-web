@@ -1,13 +1,13 @@
 use yew::prelude::*;
 
-pub struct YourAccount {}
+pub struct YourAccount;
 
 impl Component for YourAccount {
     type Properties = ();
     type Message = ();
 
     fn create(_: Self::Properties, _: ComponentLink<Self>) -> Self {
-        Self {}
+        Self
     }
 
     fn update(&mut self, _: Self::Message) -> ShouldRender {

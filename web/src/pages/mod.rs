@@ -1,29 +1,31 @@
-mod style;
-
-pub use style::Style;
-
 mod new_account;
+mod style;
 mod welcome;
 mod your_account;
 
+use at2_ns::User;
 use new_account::NewAccount;
+pub use style::Style;
 use welcome::Welcome;
-use your_account::YourAccount;
-
 use yew::prelude::*;
+use your_account::YourAccount;
 
 pub enum Message {
     PreviousPage,
     NextPage,
 
-    ValidateNewAccount(bool),
+    UserCreated(Box<User>),
 }
+
+const PAGE_COUNT: usize = 3;
 
 pub struct Pages {
     link: ComponentLink<Self>,
     index: usize,
 
-    new_account_is_valid: bool,
+    can_move_to_next_page: [bool; PAGE_COUNT],
+
+    user: Option<User>,
 }
 
 impl Component for Pages {
@@ -34,7 +36,10 @@ impl Component for Pages {
         Self {
             link,
             index: 0,
-            new_account_is_valid: false,
+
+            can_move_to_next_page: [true, false, true],
+
+            user: None,
         }
     }
 
@@ -48,8 +53,9 @@ impl Component for Pages {
                 self.index += 1;
                 true
             }
-            Self::Message::ValidateNewAccount(is_valid) => {
-                self.new_account_is_valid = is_valid;
+            Self::Message::UserCreated(user) => {
+                debug_assert!(matches!(self.user, None));
+                self.user = Some(*user);
                 true
             }
         }
@@ -60,12 +66,10 @@ impl Component for Pages {
     }
 
     fn view(&self) -> Html {
-        const PAGE_COUNT: usize = 3;
-
         html! { <>
             <div hidden=self.index != 0> <Welcome/> </div>
             <div hidden=self.index != 1> <NewAccount
-                validate=self.link.callback(Self::Message::ValidateNewAccount)
+                on_new_user=self.link.callback(Self::Message::UserCreated)
             /> </div>
             <div hidden=self.index != 2> <YourAccount/> </div>
 
@@ -78,8 +82,7 @@ impl Component for Pages {
                 <button
                     onclick=self.link.callback(|_| Self::Message::NextPage)
                     disabled=
-                        self.index+1 == PAGE_COUNT ||
-                        (self.index == 1 && !self.new_account_is_valid)
+                        self.index+1 == PAGE_COUNT || !self.can_move_to_next_page[self.index]
                 > { "Next" } </button>
             </div>
         </> }

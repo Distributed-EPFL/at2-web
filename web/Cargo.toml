@@ -6,6 +6,14 @@ edition = "2018"
 license = "AGPL-3.0-only"
 
 [dependencies]
+at2-ns = { path = "../at2-ns" }
+bincode = "1"
+drop = { git = "https://github.com/Distributed-EPFL/drop", branch = "add-wasm" }
+grpc-web-client = { git = "https://github.com/c4dt/grpc-web-client", branch = "fix-service-trait" }
+http = "0.2"
+serde = "1"
+snafu = "0.6"
+wasm-bindgen-futures = "0.4"
 yew = "0.18"
 
 [build-dependencies]

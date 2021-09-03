@@ -1,5 +1,6 @@
 use std::{net::SocketAddr, process};
 
+use at2_ns::proto::name_service_server::NameServiceServer;
 use snafu::ResultExt;
 use structopt::StructOpt;
 use tonic::transport::Server;
@@ -7,7 +8,6 @@ use tracing::{subscriber, Level};
 use tracing_fmt::FmtSubscriber;
 
 mod accounts;
-mod proto;
 mod rpc;
 
 #[derive(structopt::StructOpt)]
@@ -35,8 +35,11 @@ async fn run(address: SocketAddr) -> Result<(), Error> {
 
     let service = rpc::Service::new();
 
+    let config = tonic_web::config().allow_all_origins();
+
     Server::builder()
-        .add_service(proto::name_service_server::NameServiceServer::new(service))
+        .accept_http1(true)
+        .add_service(config.enable(NameServiceServer::new(service)))
         .serve(address)
         .await
         .context(Rpc)?;

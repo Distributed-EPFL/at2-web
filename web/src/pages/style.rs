@@ -1,13 +1,13 @@
 use yew::prelude::*;
 
-pub struct Style {}
+pub struct Style;
 
 impl Component for Style {
     type Properties = ();
     type Message = ();
 
     fn create(_: Self::Properties, _: ComponentLink<Self>) -> Self {
-        Self {}
+        Self
     }
 
     fn update(&mut self, _: Self::Message) -> ShouldRender {

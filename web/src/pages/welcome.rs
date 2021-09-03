@@ -1,13 +1,13 @@
 use yew::prelude::*;
 
-pub struct Welcome {}
+pub struct Welcome;
 
 impl Component for Welcome {
     type Properties = ();
     type Message = ();
 
     fn create(_: Self::Properties, _: ComponentLink<Self>) -> Self {
-        Self {}
+        Self
     }
 
     fn update(&mut self, _: Self::Message) -> ShouldRender {

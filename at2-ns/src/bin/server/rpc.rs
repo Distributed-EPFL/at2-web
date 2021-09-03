@@ -1,10 +1,8 @@
+use at2_ns::proto;
 use drop::crypto::sign;
 use snafu::{OptionExt, ResultExt};
 
-use super::{
-    accounts::{self, Accounts},
-    proto,
-};
+use super::accounts::{self, Accounts};
 
 #[derive(snafu::Snafu, Debug)]
 pub enum ProtoError {
