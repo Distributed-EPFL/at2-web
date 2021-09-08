@@ -2,7 +2,7 @@ name: deployement
 
 on:
   workflow_run:
-    workflows: [CI]
+    workflows: ["integration"]
     branches: [main]
     types: [completed]
 
@@ -14,6 +14,7 @@ jobs:
   deploy-ns:
     name: deploy AT2's name service
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v2
 
@@ -43,6 +44,7 @@ jobs:
   deploy-web:
     name: deploy website
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v2
 
