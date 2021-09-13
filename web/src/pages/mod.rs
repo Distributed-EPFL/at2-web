@@ -23,8 +23,6 @@ pub struct Pages {
     link: ComponentLink<Self>,
     index: usize,
 
-    can_move_to_next_page: [bool; PAGE_COUNT],
-
     user: Option<User>,
 }
 
@@ -36,8 +34,6 @@ impl Component for Pages {
         Self {
             link,
             index: 0,
-
-            can_move_to_next_page: [true, false, true],
 
             user: None,
         }
@@ -82,7 +78,7 @@ impl Component for Pages {
                 <button
                     onclick=self.link.callback(|_| Self::Message::NextPage)
                     disabled=
-                        self.index+1 == PAGE_COUNT || !self.can_move_to_next_page[self.index]
+                        self.index+1 == PAGE_COUNT || (self.index == 1 && self.user.is_none())
                 > { "Next" } </button>
             </div>
         </> }

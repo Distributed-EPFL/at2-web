@@ -1,6 +1,7 @@
 use yew::prelude::*;
 
 mod pages;
+mod config;
 
 fn main() {
     yew::start_app::<App>();

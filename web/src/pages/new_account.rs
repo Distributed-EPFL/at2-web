@@ -2,6 +2,8 @@ use at2_ns::{Client, User};
 use wasm_bindgen_futures::spawn_local;
 use yew::{prelude::*, services::ConsoleService};
 
+use super::super::config::NAME_SERVICE_URI;
+
 #[derive(Properties, Clone, PartialEq)]
 pub struct Properties {
     pub on_new_user: Callback<Box<User>>,
@@ -24,8 +26,6 @@ pub struct NewAccount {
 
     user_state: UserState,
 }
-
-const NAME_SERVICE_URI: &str = "http://localhost:6263";
 
 impl Component for NewAccount {
     type Properties = Properties;
@@ -57,7 +57,7 @@ impl Component for NewAccount {
                         spawn_local(async move {
                             let user = User::new(username.clone());
 
-                            let mut client = Client::new(NAME_SERVICE_URI.parse().unwrap());
+                            let mut client = Client::new(NAME_SERVICE_URI.parse().unwrap()); // TODO unwrap
                             client.put(&user).await.unwrap(); // TODO unwrap
 
                             callback.emit(Box::new(user));
@@ -71,6 +71,9 @@ impl Component for NewAccount {
             }
             Self::Message::UserCreated(user) => {
                 ConsoleService::info(&format!("new user: {:?}", user));
+
+                self.properties.on_new_user.emit(user);
+
                 false
             }
         }
