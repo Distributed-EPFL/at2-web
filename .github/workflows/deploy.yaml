@@ -38,8 +38,13 @@ jobs:
 
       - name: rsync repository
         run: >
-          rsync --verbose --archive --delete "$GITHUB_WORKSPACE/target/release/server"
+          rsync --archive "$GITHUB_WORKSPACE/target/release/server"
           "${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:at2-ns"
+
+      - name: start service
+        run: >
+          ssh "${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}"
+            systemctl --user restart at2-ns
 
   deploy-web:
     name: deploy website

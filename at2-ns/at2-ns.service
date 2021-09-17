@@ -1,9 +1,0 @@
-[Unit]
-After=network.target
-
-[Service]
-ExecStart=%h/bin/at2-ns
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
