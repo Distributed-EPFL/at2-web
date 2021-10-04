@@ -1,10 +1,12 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use drop::crypto::sign;
 use tokio::sync::{mpsc, oneshot};
 
 #[derive(snafu::Snafu, Debug)]
 pub enum Error {
+    #[snafu(display("name already registered"))]
+    AlreadyExisting,
     #[snafu(display("gone on send"))]
     GoneOnSend,
     #[snafu(display("gone on recv"))]
@@ -12,7 +14,6 @@ pub enum Error {
 }
 
 type Name = String;
-type Map = HashMap<sign::PublicKey, Name>;
 
 type Response<T> = oneshot::Sender<T>;
 
@@ -20,10 +21,10 @@ enum Commands {
     Put {
         pubkey: Box<sign::PublicKey>,
         name: Name,
-        resp: Response<()>,
+        resp: Response<Result<(), Error>>,
     },
     GetAll {
-        resp: Response<Map>,
+        resp: Response<HashMap<sign::PublicKey, Name>>,
     },
 }
 
@@ -50,10 +51,10 @@ impl Accounts {
             .await
             .map_err(|_| Error::GoneOnSend)?;
 
-        rx.await.map_err(|_| Error::GoneOnRecv)
+        rx.await.map_err(|_| Error::GoneOnRecv)?
     }
 
-    pub async fn get_all(&self) -> Result<Map, Error> {
+    pub async fn get_all(&self) -> Result<HashMap<sign::PublicKey, Name>, Error> {
         let (tx, rx) = oneshot::channel();
 
         self.agent
@@ -66,13 +67,15 @@ impl Accounts {
 }
 
 struct AccountsHandler {
-    map: Map,
+    pubkey_to_name: HashMap<sign::PublicKey, Name>,
+    names: HashSet<Name>,
 }
 
 impl AccountsHandler {
     fn new() -> Self {
         Self {
-            map: Default::default(),
+            pubkey_to_name: Default::default(),
+            names: Default::default(),
         }
     }
 
@@ -83,11 +86,41 @@ impl AccountsHandler {
             while let Some(cmd) = rx.recv().await {
                 match cmd {
                     Commands::Put { pubkey, name, resp } => {
-                        self.map.insert(*pubkey, name);
-                        let _ = resp.send(());
+                        use std::collections::hash_map::Entry;
+
+                        let _ = match self.pubkey_to_name.entry(*pubkey) {
+                            // nobody claimed the name
+                            Entry::Vacant(entry) => {
+                                entry.insert(name.clone());
+                                self.names.insert(name.clone());
+
+                                resp.send(Ok(()))
+                            }
+                            // same association already existing
+                            Entry::Occupied(existing) if existing.get() == &name => {
+                                resp.send(Ok(()))
+                            }
+                            // trying to put an already existing association
+                            Entry::Occupied(_) if self.names.get(&name).is_some() => {
+                                resp.send(AlreadyExisting.fail())
+                            }
+                            // changing its name
+                            Entry::Occupied(mut entry) => {
+                                self.names.remove(entry.get());
+                                self.names.insert(name.clone());
+                                entry.insert(name.clone());
+
+                                resp.send(Ok(()))
+                            }
+                        };
+
+                        debug_assert_eq!(
+                            self.names,
+                            self.pubkey_to_name.values().cloned().collect(),
+                        )
                     }
                     Commands::GetAll { resp } => {
-                        let _ = resp.send(self.map.clone());
+                        let _ = resp.send(self.pubkey_to_name.clone());
                     }
                 }
             }
