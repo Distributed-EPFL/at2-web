@@ -41,10 +41,10 @@ jobs:
           rsync --archive "$GITHUB_WORKSPACE/target/debug/server"
           "${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:at2-ns"
 
-      - name: start service
+      - name: rebuild docker-compose
         run: >
           ssh "${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}"
-            systemctl --user restart at2-ns
+            docker-compose up --detach
 
   deploy-web:
     name: deploy website
