@@ -46,7 +46,7 @@ impl Component for NewAccount {
                     UserState::Username(_) => self.user_state = UserState::Username(username),
                     UserState::Created => panic!("user already created"),
                 }
-                false
+                true
             }
             Self::Message::CreateUser => {
                 match self.user_state {
@@ -107,7 +107,8 @@ impl Component for NewAccount {
 
             <button
                 onclick=self.link.callback(|_| Self::Message::CreateUser)
-                disabled=matches!(self.user_state, UserState::Created)
+                disabled=matches!(&self.user_state, UserState::Username(s) if s.is_empty()) ||
+                    matches!(self.user_state, UserState::Created)
             > { "Create user" } </button>
 
             <hr />
