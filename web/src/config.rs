@@ -1,1 +1,1 @@
-pub const NAME_SERVICE_URI: &str = "http://localhost:6263";
+pub const NAME_SERVICE_URI: &str = "https://factory.c4dt.org/incubator/at2/demo/ns";
