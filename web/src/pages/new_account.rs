@@ -1,6 +1,6 @@
 use at2_ns::{Client, User};
 use wasm_bindgen_futures::spawn_local;
-use yew::{prelude::*, services::ConsoleService};
+use yew::prelude::*;
 
 use super::super::config::NAME_SERVICE_URI;
 
@@ -70,8 +70,6 @@ impl Component for NewAccount {
                 true
             }
             Self::Message::UserCreated(user) => {
-                ConsoleService::info(&format!("new user: {:?}", user));
-
                 self.properties.on_new_user.emit(user);
 
                 false
