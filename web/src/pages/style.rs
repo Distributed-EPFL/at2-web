@@ -48,6 +48,16 @@ impl Component for Style {
             .page > p {
                 text-align: justify;
             }
+
+            .boxes {
+                display: flex;
+                align-items: center;
+                justify-content: space-around;
+            }
+            .boxes > p {
+                border: solid;
+                padding: 1em 2em;
+            }
         " } </style> }
     }
 }

@@ -82,6 +82,8 @@ impl Component for NewAccount {
     }
 
     fn view(&self) -> Html {
+        // TODO fetch network
+        let network = ["C4DT", "DCL", "ineiti"];
         html! { <div class=classes!("page")>
             <h1> { "New account" } </h1>
 
@@ -112,6 +114,11 @@ impl Component for NewAccount {
             <hr />
 
             <h2> { "Network" } </h2>
+            <span class=classes!("boxes") >
+                { for network.iter().map(|node| html! {
+                    <p> { node } </p>
+                }) }
+            </span>
         </div> }
     }
 }
