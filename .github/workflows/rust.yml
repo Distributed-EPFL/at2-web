@@ -19,6 +19,7 @@ jobs:
         name: cargo test
         with:
           command: test
+          args: --all-features
 
   checks:
     runs-on: ubuntu-latest
