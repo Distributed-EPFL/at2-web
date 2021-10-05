@@ -23,14 +23,6 @@ pub enum Message {
     NewUsers(Vec<Account>),
 }
 
-impl YourAccount {
-    fn render_user(user: &Account) -> Html {
-        html! {
-            <p> { &user.name } </p>
-        }
-    }
-}
-
 impl Component for YourAccount {
     type Properties = ();
     type Message = Message;
@@ -92,7 +84,11 @@ impl Component for YourAccount {
 
             <h2> { "Addressbook" } </h2>
 
-            { for self.users.iter().map(YourAccount::render_user) }
+            <span class=classes!("boxes")>
+                { for self.users.iter().map(|user| html! {
+                    <p> { &user.name } </p>
+                }) }
+            </span>
 
         </div> }
     }
