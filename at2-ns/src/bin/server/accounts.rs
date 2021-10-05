@@ -88,36 +88,37 @@ impl AccountsHandler {
                     Commands::Put { pubkey, name, resp } => {
                         use std::collections::hash_map::Entry;
 
-                        let _ = match self.pubkey_to_name.entry(*pubkey) {
+                        let _ = resp.send(match self.pubkey_to_name.entry(*pubkey) {
                             // nobody claimed the name
-                            Entry::Vacant(entry) => {
+                            Entry::Vacant(entry) if !self.names.contains(&name) => {
                                 entry.insert(name.clone());
                                 self.names.insert(name.clone());
 
-                                resp.send(Ok(()))
+                                Ok(())
                             }
                             // same association already existing
-                            Entry::Occupied(existing) if existing.get() == &name => {
-                                resp.send(Ok(()))
+                            Entry::Occupied(existing) if existing.get() == &name => Ok(()),
+
+                            // someone already claimed the name
+                            Entry::Occupied(_) if self.names.contains(&name) => {
+                                AlreadyExisting.fail()
                             }
-                            // trying to put an already existing association
-                            Entry::Occupied(_) if self.names.get(&name).is_some() => {
-                                resp.send(AlreadyExisting.fail())
-                            }
+                            Entry::Vacant(_) => AlreadyExisting.fail(),
+
                             // changing its name
                             Entry::Occupied(mut entry) => {
                                 self.names.remove(entry.get());
                                 self.names.insert(name.clone());
                                 entry.insert(name.clone());
 
-                                resp.send(Ok(()))
+                                Ok(())
                             }
-                        };
+                        });
 
-                        debug_assert_eq!(
-                            self.names,
-                            self.pubkey_to_name.values().cloned().collect(),
-                        )
+                        debug_assert!({
+                            let mut names = self.names.clone();
+                            self.pubkey_to_name.values().all(|name| names.remove(name))
+                        })
                     }
                     Commands::GetAll { resp } => {
                         let _ = resp.send(self.pubkey_to_name.clone());
@@ -127,5 +128,97 @@ impl AccountsHandler {
         });
 
         tx
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use at2_ns::User;
+
+    use super::Accounts;
+
+    #[tokio::test]
+    async fn put_once_returns_it_in_get_all() {
+        let accounts = Accounts::new();
+        let user = User::new("user".to_owned());
+
+        accounts
+            .put(user.public_key(), user.name().to_owned())
+            .await
+            .expect("put user");
+
+        assert_eq!(
+            accounts
+                .get_all()
+                .await
+                .expect("get all")
+                .into_iter()
+                .collect::<Vec<_>>(),
+            vec![(user.public_key(), "user".to_owned())],
+        );
+    }
+
+    #[tokio::test]
+    async fn put_twice_update_name() {
+        let accounts = Accounts::new();
+        let user = User::new("user".to_owned());
+
+        accounts
+            .put(user.public_key(), "first".to_owned())
+            .await
+            .expect("first put");
+        accounts
+            .put(user.public_key(), "second".to_owned())
+            .await
+            .expect("second put");
+
+        assert_eq!(
+            accounts
+                .get_all()
+                .await
+                .expect("get all")
+                .into_iter()
+                .collect::<Vec<_>>(),
+            vec![(user.public_key(), "second".to_owned())],
+        );
+    }
+
+    #[tokio::test]
+    async fn put_for_same_name_with_different_pubkey_fails() {
+        let accounts = Accounts::new();
+
+        let first_user = User::new("user".to_owned());
+        let second_user = User::new("user".to_owned());
+
+        accounts
+            .put(first_user.public_key(), first_user.name().to_owned())
+            .await
+            .expect("put first user");
+        accounts
+            .put(second_user.public_key(), second_user.name().to_owned())
+            .await
+            .expect_err("fail to put second user");
+    }
+
+    #[tokio::test]
+    async fn update_name_for_another_already_existing() {
+        let accounts = Accounts::new();
+
+        let first_user = User::new("user".to_owned());
+        let second_user = User::new("usr".to_owned());
+
+        accounts
+            .put(first_user.public_key(), first_user.name().to_owned())
+            .await
+            .expect("put first user");
+        accounts
+            .put(second_user.public_key(), second_user.name().to_owned())
+            .await
+            .expect("put second user");
+
+        accounts
+            .put(second_user.public_key(), "user".to_owned())
+            .await
+            .expect_err("fail to update name for second user");
     }
 }

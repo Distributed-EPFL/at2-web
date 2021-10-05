@@ -19,6 +19,7 @@ pub enum Error {
     },
 }
 
+#[derive(Clone)]
 pub struct Client(NameServiceClient<grpc_web_client::Client>);
 
 impl Client {
