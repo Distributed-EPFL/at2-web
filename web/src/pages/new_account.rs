@@ -2,6 +2,7 @@ use at2_ns::{
     client::{self, Client},
     FullUser,
 };
+use drop::crypto::sign;
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
 
@@ -15,7 +16,7 @@ pub struct Properties {
 pub enum Message {
     SetUsername(String),
     CreateUser,
-    UserCreated(Result<Box<FullUser>, client::Error>),
+    UserPut(Result<Box<FullUser>, client::Error>),
 }
 
 pub struct NewAccount {
@@ -25,6 +26,7 @@ pub struct NewAccount {
     client: Client,
 
     username: String,
+    keypair: sign::KeyPair,
     create_user_error: Option<client::Error>,
 }
 
@@ -40,6 +42,7 @@ impl Component for NewAccount {
             properties,
             client: Client::new(conf.name_service()),
             username: "".to_owned(),
+            keypair: sign::KeyPair::random(),
             create_user_error: None,
         }
     }
@@ -51,24 +54,18 @@ impl Component for NewAccount {
                 true
             }
             Self::Message::CreateUser => {
-                let username = self.username.clone();
+                let user = FullUser::new(self.username.clone(), self.keypair.clone());
+
                 let mut client = self.client.clone();
-                let callback = self.link.callback(Self::Message::UserCreated);
+                let callback = self.link.callback(Self::Message::UserPut);
 
                 spawn_local(async move {
-                    callback.emit(
-                        async {
-                            let user = FullUser::new(username);
-
-                            client.put(&user).await.map(|_| Box::new(user))
-                        }
-                        .await,
-                    )
+                    callback.emit(client.put(&user).await.map(|_| Box::new(user)))
                 });
 
-                true
+                false
             }
-            Self::Message::UserCreated(res) => {
+            Self::Message::UserPut(res) => {
                 match res {
                     Ok(user) => {
                         self.properties.on_new_user.emit(user);
@@ -103,18 +100,28 @@ impl Component for NewAccount {
 
             <hr />
 
-            <label>
-                { "Enter your username" }
-                <input
-                    oninput=self.link.callback(|event: InputData|
-                        Self::Message::SetUsername(event.value))
-                    type={ "text" }
-                />
-            </label>
+            <div style=concat!(
+                "display: flex;",
+                "flex-direction: column;",
+                "align-items: center;",
+            )>
+                <div style="display: flex; padding: 1em 0em">
+                    <label> { "Enter your username" } </label>
+                    <input
+                        oninput=self.link.callback(|event: InputData|
+                            Self::Message::SetUsername(event.value))
+                        type={ "text" }
+                    />
+                </div>
 
-            <button
-                onclick=self.link.callback(|_| Self::Message::CreateUser)
-            > { "Create user" } </button>
+                <button
+                    onclick=self.link.callback(|_| Self::Message::CreateUser)
+                > { "Create user" } </button>
+
+                { self.create_user_error.as_ref().map(|err| html! {
+                    <p> { format!("error while creating user: {}", err) } </p>
+                }).unwrap_or_else(|| html! {}) }
+            </div>
 
             <hr />
 

@@ -7,9 +7,7 @@ pub struct FullUser {
 }
 
 impl FullUser {
-    pub fn new(name: String) -> Self {
-        let keypair = sign::KeyPair::random();
-
+    pub fn new(name: String, keypair: sign::KeyPair) -> Self {
         Self { name, keypair }
     }
 
