@@ -29,6 +29,8 @@ impl Component for Style {
 
               text-align: center;
 
+              background-color: inherit;
+
               /* override base CSS */
               margin: 0;
             }
