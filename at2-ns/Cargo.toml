@@ -14,7 +14,7 @@ bincode = { version = "1", optional = true }
 drop = { git = "https://github.com/Distributed-EPFL/drop.git", branch = "add-wasm", optional = true }
 
 # client
-grpc-web-client = { git = "https://github.com/titanous/grpc-web-client", optional = true }
+grpc-web-client = { git = "https://github.com/titanous/grpc-web-client", branch = "main", optional = true }
 http = { version = "0.2", optional = true }
 serde = { version = "1", optional = true }
 snafu = { version = "0.6", optional = true }
