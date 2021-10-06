@@ -1,7 +1,6 @@
 pub mod proto;
 
-mod client;
-pub use client::Client;
+pub mod client;
 
 mod user;
 pub use user::{FullUser, ThinUser};

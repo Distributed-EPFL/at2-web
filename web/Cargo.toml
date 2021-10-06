@@ -8,6 +8,7 @@ license = "AGPL-3.0-only"
 [dependencies]
 at2-ns = { path = "../at2-ns" }
 gloo-timers = "0.2"
+http = "0.2"
 wasm-bindgen-futures = "0.4"
 yew = "0.18"
 

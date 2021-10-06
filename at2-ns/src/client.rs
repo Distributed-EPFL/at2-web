@@ -23,7 +23,7 @@ pub enum Error {
 pub struct Client(NameServiceClient<grpc_web_client::Client>);
 
 impl Client {
-    pub fn new(uri: Uri) -> Self {
+    pub fn new(uri: &Uri) -> Self {
         let mut url_string = uri.to_string();
         if uri.path() == "/" {
             // TODO fix upstream handling

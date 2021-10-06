@@ -1,8 +1,11 @@
-use at2_ns::{Client, FullUser};
+use at2_ns::{
+    client::{self, Client},
+    FullUser,
+};
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
 
-use super::super::config::NAME_SERVICE_URI;
+use crate::config::Config;
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct Properties {
@@ -12,19 +15,17 @@ pub struct Properties {
 pub enum Message {
     SetUsername(String),
     CreateUser,
-    UserCreated(Box<FullUser>),
-}
-
-enum UserState {
-    Username(String),
-    Created,
+    UserCreated(Result<Box<FullUser>, client::Error>),
 }
 
 pub struct NewAccount {
     link: ComponentLink<Self>,
     properties: Properties,
 
-    user_state: UserState,
+    client: Client,
+
+    username: String,
+    create_user_error: Option<client::Error>,
 }
 
 impl Component for NewAccount {
@@ -32,47 +33,53 @@ impl Component for NewAccount {
     type Message = Message;
 
     fn create(properties: Self::Properties, link: ComponentLink<Self>) -> Self {
+        let conf = Config::parse().unwrap(); // TODO unwrap
+
         Self {
             link,
             properties,
-            user_state: UserState::Username("".to_owned()),
+            client: Client::new(conf.name_service()),
+            username: "".to_owned(),
+            create_user_error: None,
         }
     }
 
     fn update(&mut self, message: Self::Message) -> ShouldRender {
         match message {
             Self::Message::SetUsername(username) => {
-                match self.user_state {
-                    UserState::Username(_) => self.user_state = UserState::Username(username),
-                    UserState::Created => panic!("user already created"),
-                }
+                self.username = username;
                 true
             }
             Self::Message::CreateUser => {
-                match self.user_state {
-                    UserState::Username(ref username) => {
-                        let username = username.to_owned();
-                        let callback = self.link.callback(Self::Message::UserCreated);
+                let username = self.username.clone();
+                let mut client = self.client.clone();
+                let callback = self.link.callback(Self::Message::UserCreated);
 
-                        spawn_local(async move {
-                            let user = FullUser::new(username.clone());
+                spawn_local(async move {
+                    callback.emit(
+                        async {
+                            let user = FullUser::new(username);
 
-                            let mut client = Client::new(NAME_SERVICE_URI.parse().unwrap()); // TODO unwrap
-                            client.put(&user).await.unwrap(); // TODO unwrap
+                            client.put(&user).await.map(|_| Box::new(user))
+                        }
+                        .await,
+                    )
+                });
 
-                            callback.emit(Box::new(user));
-                        });
-
-                        self.user_state = UserState::Created;
-                    }
-                    UserState::Created => panic!("user already created"),
-                }
                 true
             }
-            Self::Message::UserCreated(user) => {
-                self.properties.on_new_user.emit(user);
+            Self::Message::UserCreated(res) => {
+                match res {
+                    Ok(user) => {
+                        self.properties.on_new_user.emit(user);
+                        self.create_user_error = None;
+                    }
+                    Err(err) => {
+                        self.create_user_error = Some(err);
+                    }
+                }
 
-                false
+                true
             }
         }
     }
@@ -84,6 +91,7 @@ impl Component for NewAccount {
     fn view(&self) -> Html {
         // TODO fetch network
         let network = ["C4DT", "DCL", "ineiti"];
+
         html! { <div class=classes!("page")>
             <h1> { "New account" } </h1>
 
@@ -100,15 +108,12 @@ impl Component for NewAccount {
                 <input
                     oninput=self.link.callback(|event: InputData|
                         Self::Message::SetUsername(event.value))
-                    disabled=matches!(self.user_state, UserState::Created)
                     type={ "text" }
                 />
             </label>
 
             <button
                 onclick=self.link.callback(|_| Self::Message::CreateUser)
-                disabled=matches!(&self.user_state, UserState::Username(s) if s.is_empty()) ||
-                    matches!(self.user_state, UserState::Created)
             > { "Create user" } </button>
 
             <hr />

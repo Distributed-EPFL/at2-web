@@ -1,9 +1,9 @@
-use at2_ns::{Client, ThinUser};
+use at2_ns::{client::Client, ThinUser};
 use gloo_timers::callback::Interval;
 use wasm_bindgen_futures::spawn_local;
-use yew::prelude::*;
+use yew::{prelude::*, services::ConsoleService};
 
-use super::super::config::NAME_SERVICE_URI;
+use crate::config::Config;
 
 pub struct YourAccount {
     users: Vec<ThinUser>,
@@ -18,13 +18,17 @@ impl Component for YourAccount {
     type Message = Message;
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Interval::new(1_000, move || {
-            let send_new_users = link.callback(Self::Message::NewUsers);
-            spawn_local(async move {
-                let mut client = Client::new(NAME_SERVICE_URI.parse().unwrap()); // TODO unwrap
-                let users = client.get_all().await.unwrap(); // TODO unwrap
+        let conf = Config::parse().unwrap(); // TODO unwrap
 
-                send_new_users.emit(users);
+        Interval::new(1_000, move || {
+            let mut client = Client::new(conf.name_service());
+            let send_new_users = link.callback(Self::Message::NewUsers);
+
+            spawn_local(async move {
+                match client.get_all().await {
+                    Ok(users) => send_new_users.emit(users),
+                    Err(err) => ConsoleService::error(&format!("unable to refresh users: {}", err)),
+                }
             });
         })
         .forget();
