@@ -1,16 +1,14 @@
 use drop::crypto::sign;
 
 #[derive(Debug)]
-pub struct User {
+pub struct FullUser {
     name: String,
     keypair: sign::KeyPair,
 }
 
-impl User {
+impl FullUser {
     pub fn new(name: String) -> Self {
         let keypair = sign::KeyPair::random();
-
-        // TODO push on nameserver
 
         Self { name, keypair }
     }

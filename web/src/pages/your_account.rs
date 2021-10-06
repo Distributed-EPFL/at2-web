@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use at2_ns::{proto::Account, Client};
+use at2_ns::{Client, ThinUser};
 use wasm_bindgen_futures::spawn_local;
 use yew::{
     prelude::*,
@@ -10,8 +10,8 @@ use yew::{
 use super::super::config::NAME_SERVICE_URI;
 
 pub struct YourAccount {
-    send_new_users: Callback<Vec<Account>>,
-    users: Vec<Account>,
+    send_new_users: Callback<Vec<ThinUser>>,
+    users: Vec<ThinUser>,
 
     // no way to stop refreshing
     #[allow(dead_code)]
@@ -20,7 +20,7 @@ pub struct YourAccount {
 
 pub enum Message {
     FetchUsers,
-    NewUsers(Vec<Account>),
+    NewUsers(Vec<ThinUser>),
 }
 
 impl Component for YourAccount {
@@ -118,7 +118,7 @@ impl Component for YourAccount {
 
             <span class=classes!("boxes")>
                 { for self.users.iter().map(|user| html! {
-                    <p> { &user.name } </p>
+                    <p> { user.name() } </p>
                 }) }
             </span>
 

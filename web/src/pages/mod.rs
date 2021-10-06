@@ -3,7 +3,7 @@ mod style;
 mod welcome;
 mod your_account;
 
-use at2_ns::User;
+use at2_ns::FullUser;
 use new_account::NewAccount;
 pub use style::Style;
 use welcome::Welcome;
@@ -14,7 +14,7 @@ pub enum Message {
     PreviousPage,
     NextPage,
 
-    UserCreated(Box<User>),
+    UserCreated(Box<FullUser>),
 }
 
 const PAGE_COUNT: usize = 3;
@@ -23,7 +23,7 @@ pub struct Pages {
     link: ComponentLink<Self>,
     index: usize,
 
-    user: Option<User>,
+    user: Option<FullUser>,
 }
 
 impl Component for Pages {

@@ -4,4 +4,4 @@ mod client;
 pub use client::Client;
 
 mod user;
-pub use user::User;
+pub use user::{FullUser, ThinUser};

@@ -3,7 +3,7 @@ use snafu::{ResultExt, Snafu};
 
 use crate::{
     proto::{name_service_client::NameServiceClient, *},
-    User,
+    FullUser, ThinUser,
 };
 
 #[derive(Debug, Snafu)]
@@ -35,7 +35,7 @@ impl Client {
         )))
     }
 
-    pub async fn put(&mut self, user: &User) -> Result<(), Error> {
+    pub async fn put(&mut self, user: &FullUser) -> Result<(), Error> {
         self.0
             .put(PutRequest {
                 account: Some(Account {
@@ -50,12 +50,18 @@ impl Client {
             .map(|_| {})
     }
 
-    // TODO return thin users
-    pub async fn get_all(&mut self) -> Result<Vec<Account>, Error> {
+    pub async fn get_all(&mut self) -> Result<Vec<ThinUser>, Error> {
         self.0
             .get_all(GetAllRequest {})
             .await
             .context(Rpc)
-            .map(|reply| reply.into_inner().accounts)
+            .map(|reply| {
+                reply
+                    .into_inner()
+                    .accounts
+                    .iter()
+                    .map(|account| ThinUser::new(account.name.clone()))
+                    .collect()
+            })
     }
 }

@@ -1,4 +1,4 @@
-use at2_ns::{Client, User};
+use at2_ns::{Client, FullUser};
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
 
@@ -6,13 +6,13 @@ use super::super::config::NAME_SERVICE_URI;
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct Properties {
-    pub on_new_user: Callback<Box<User>>,
+    pub on_new_user: Callback<Box<FullUser>>,
 }
 
 pub enum Message {
     SetUsername(String),
     CreateUser,
-    UserCreated(Box<User>),
+    UserCreated(Box<FullUser>),
 }
 
 enum UserState {
@@ -55,7 +55,7 @@ impl Component for NewAccount {
                         let callback = self.link.callback(Self::Message::UserCreated);
 
                         spawn_local(async move {
-                            let user = User::new(username.clone());
+                            let user = FullUser::new(username.clone());
 
                             let mut client = Client::new(NAME_SERVICE_URI.parse().unwrap()); // TODO unwrap
                             client.put(&user).await.unwrap(); // TODO unwrap
