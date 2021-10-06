@@ -44,7 +44,7 @@ jobs:
       - name: rebuild docker-compose
         run: >
           ssh "${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}"
-          docker-compose up --detach
+          docker-compose up --detach --build
 
   deploy-web:
     name: deploy website
