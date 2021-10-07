@@ -1,6 +1,7 @@
 mod new_account;
 mod speedtest;
 mod style;
+mod summary;
 mod welcome;
 mod your_account;
 
@@ -8,6 +9,7 @@ use at2_ns::FullUser;
 use new_account::NewAccount;
 use speedtest::Speedtest;
 pub use style::Style;
+use summary::Summary;
 use welcome::Welcome;
 use yew::prelude::*;
 use your_account::YourAccount;
@@ -19,7 +21,7 @@ pub enum Message {
     UserCreated(Box<FullUser>),
 }
 
-const PAGE_COUNT: usize = 4;
+const PAGE_COUNT: usize = 5;
 
 pub struct Pages {
     link: ComponentLink<Self>,
@@ -71,6 +73,7 @@ impl Component for Pages {
             /> </div>
             <div hidden=self.index != 2> <YourAccount/> </div>
             <div hidden=self.index != 3> <Speedtest/> </div>
+            <div hidden=self.index != 4> <Summary/> </div>
 
             <div class=classes!("bottom")>
                 <button
