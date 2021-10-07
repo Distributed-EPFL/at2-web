@@ -1,6 +1,6 @@
 use drop::crypto::sign;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FullUser {
     name: String,
     keypair: sign::KeyPair,

@@ -64,13 +64,17 @@ impl proto::name_service_server::NameService for Service {
         &self,
         _: tonic::Request<proto::GetAllRequest>,
     ) -> Result<tonic::Response<proto::GetAllReply>, tonic::Status> {
-        let mut accounts = Vec::default();
-        for (public_key, name) in self.accounts.get_all().await?.drain() {
-            accounts.push(proto::Account {
-                public_key: bincode::serialize(&public_key).context(InvalidSerialization)?,
-                name,
+        let accounts = self
+            .accounts
+            .get_all()
+            .await?
+            .drain()
+            .map(|(public_key, name)| {
+                bincode::serialize(&public_key)
+                    .context(InvalidSerialization)
+                    .map(|public_key| proto::Account { public_key, name })
             })
-        }
+            .collect::<Result<_, _>>()?;
 
         Ok(tonic::Response::new(proto::GetAllReply { accounts }))
     }

@@ -1,16 +1,17 @@
-use at2_ns::{client::Client, ThinUser};
-use gloo_timers::callback::Interval;
-use wasm_bindgen_futures::spawn_local;
-use yew::{prelude::*, services::ConsoleService};
+use at2_ns::ThinUser;
+use yew::{prelude::*, worker::Agent};
 
-use crate::config::Config;
+use crate::users_agent::UsersAgent;
 
 pub struct YourAccount {
+    #[allow(dead_code)] // never dropped
+    users_agent: Box<dyn Bridge<UsersAgent>>,
+
     users: Vec<ThinUser>,
 }
 
 pub enum Message {
-    NewUsers(Vec<ThinUser>),
+    UsersAgent(<UsersAgent as Agent>::Output),
 }
 
 impl Component for YourAccount {
@@ -18,27 +19,20 @@ impl Component for YourAccount {
     type Message = Message;
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let conf = Config::parse().unwrap(); // TODO unwrap
+        let users_agent = UsersAgent::bridge(link.callback(Self::Message::UsersAgent));
 
-        Interval::new(1_000, move || {
-            let mut client = Client::new(conf.name_service());
-            let send_new_users = link.callback(Self::Message::NewUsers);
-
-            spawn_local(async move {
-                match client.get_all().await {
-                    Ok(users) => send_new_users.emit(users),
-                    Err(err) => ConsoleService::error(&format!("unable to refresh users: {}", err)),
-                }
-            });
-        })
-        .forget();
-
-        Self { users: Vec::new() }
+        Self {
+            users_agent,
+            users: Vec::new(),
+        }
     }
 
     fn update(&mut self, message: Self::Message) -> ShouldRender {
         match message {
-            Self::Message::NewUsers(users) => {
+            Self::Message::UsersAgent(users) => {
+                let mut users = users.into_iter().collect::<Vec<_>>();
+                users.sort_by(|u1, u2| u1.name().cmp(u2.name()));
+
                 self.users = users;
                 true
             }

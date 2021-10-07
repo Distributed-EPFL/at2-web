@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use http::Uri;
 use snafu::{ResultExt, Snafu};
 
@@ -50,7 +52,7 @@ impl Client {
             .map(|_| {})
     }
 
-    pub async fn get_all(&mut self) -> Result<Vec<ThinUser>, Error> {
+    pub async fn get_all(&mut self) -> Result<HashSet<ThinUser>, Error> {
         self.0
             .get_all(GetAllRequest {})
             .await

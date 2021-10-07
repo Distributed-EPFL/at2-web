@@ -1,7 +1,16 @@
-use yew::prelude::*;
+use std::collections::HashSet;
+
+use at2_ns::ThinUser;
+use yew::{prelude::*, worker::Agent};
+
+use crate::users_agent::UsersAgent;
 
 pub struct Speedtest {
     link: ComponentLink<Self>,
+
+    #[allow(dead_code)] // never dropped
+    users_agent: Box<dyn Bridge<UsersAgent>>,
+    users: HashSet<ThinUser>,
 
     is_running: bool,
     amount: usize,
@@ -9,6 +18,7 @@ pub struct Speedtest {
 }
 
 pub enum Message {
+    UsersAgent(<UsersAgent as Agent>::Output),
     UpdateTransactionAmount(usize),
     UpdateUser(String),
     Start,
@@ -19,8 +29,12 @@ impl Component for Speedtest {
     type Message = Message;
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
+        let users_agent = UsersAgent::bridge(link.callback(Self::Message::UsersAgent));
+
         Self {
             link,
+            users_agent,
+            users: HashSet::new(),
             is_running: false,
             amount: 0,
             to_user: None,
@@ -29,6 +43,11 @@ impl Component for Speedtest {
 
     fn update(&mut self, message: Self::Message) -> ShouldRender {
         match message {
+            Self::Message::UsersAgent(users) => {
+                self.users = users;
+                true
+            }
+
             Self::Message::Start => {
                 self.is_running = true;
                 true
@@ -50,9 +69,6 @@ impl Component for Speedtest {
     }
 
     fn view(&self) -> Html {
-        // TODO fetch and store users in agent
-        let users = ["Alice", "Betty", "Catherine"];
-
         html! { <div class=classes!("page")>
             <h1> { "Speedtest" } </h1>
 
@@ -74,6 +90,8 @@ impl Component for Speedtest {
                     <input
                         oninput=self.link.callback(|event: InputData|
                             Self::Message::UpdateTransactionAmount(event.value.parse().unwrap())) // TODO unwrap
+                        value=100
+                        min=1
                         type={ "number" }
                     />
                  </label>
@@ -81,13 +99,15 @@ impl Component for Speedtest {
                 <label>
                     { "To whom to send to" }
                     <select
-                        // TODO use oninput directly?
                         onchange=self.link.callback(|event: ChangeData| match event {
                             ChangeData::Select(elem) => Self::Message::UpdateUser(elem.value()),
                             _ => unreachable!(),
                         })
                     >
-                        { for ["Anyone"].iter().chain(&users).map(|user| html! { <option>{ user }</option> }) }
+                        <option>{ "Anyone" }</option>
+                        { for self.users.iter().map(|user| html! {
+                            <option>{ user.name() }</option>
+                        }) }
                     </select>
                  </label>
 

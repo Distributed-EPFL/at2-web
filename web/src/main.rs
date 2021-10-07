@@ -2,6 +2,7 @@ use yew::prelude::*;
 
 mod pages;
 mod config;
+mod users_agent;
 
 fn main() {
     yew::start_app::<App>();
