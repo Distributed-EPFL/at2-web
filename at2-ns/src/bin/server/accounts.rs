@@ -144,7 +144,7 @@ mod tests {
         let user = FullUser::new("user".to_owned(), KeyPair::random());
 
         accounts
-            .put(user.public_key(), user.name().to_owned())
+            .put(user.public_key(), user.name.clone())
             .await
             .expect("put user");
 
@@ -192,11 +192,11 @@ mod tests {
         let second_user = FullUser::new("user".to_owned(), KeyPair::random());
 
         accounts
-            .put(first_user.public_key(), first_user.name().to_owned())
+            .put(first_user.public_key(), first_user.name.clone())
             .await
             .expect("put first user");
         accounts
-            .put(second_user.public_key(), second_user.name().to_owned())
+            .put(second_user.public_key(), second_user.name.clone())
             .await
             .expect_err("fail to put second user");
     }
@@ -209,11 +209,11 @@ mod tests {
         let second_user = FullUser::new("usr".to_owned(), KeyPair::random());
 
         accounts
-            .put(first_user.public_key(), first_user.name().to_owned())
+            .put(first_user.public_key(), first_user.name.clone())
             .await
             .expect("put first user");
         accounts
-            .put(second_user.public_key(), second_user.name().to_owned())
+            .put(second_user.public_key(), second_user.name.clone())
             .await
             .expect("put second user");
 

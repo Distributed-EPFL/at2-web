@@ -10,6 +10,8 @@ use crate::config::Config;
 pub struct UsersAgent {
     link: AgentLink<Self>,
 
+    #[allow(dead_code)] // drop when agent is destroyed
+    refresher: Interval,
     last_send: HashSet<ThinUser>,
 
     subscribers: HashSet<HandlerId>,
@@ -26,25 +28,23 @@ impl Agent for UsersAgent {
         let client = Client::new(conf.name_service());
         let update_users = link.callback(|users| users);
 
-        let ret = Self {
+        Self {
             link,
+            refresher: Interval::new(1_000, move || {
+                let (mut client, update_users) = (client.clone(), update_users.clone());
+
+                spawn_local(async move {
+                    match client.get_all().await {
+                        Ok(users) => update_users.emit(users),
+                        Err(err) => {
+                            ConsoleService::error(&format!("unable to refresh users: {}", err))
+                        }
+                    }
+                });
+            }),
             last_send: HashSet::new(),
             subscribers: HashSet::new(),
-        };
-
-        Interval::new(1_000, move || {
-            let (mut client, update_users) = (client.clone(), update_users.clone());
-
-            spawn_local(async move {
-                match client.get_all().await {
-                    Ok(users) => update_users.emit(users),
-                    Err(err) => ConsoleService::error(&format!("unable to refresh users: {}", err)),
-                }
-            });
-        })
-        .forget();
-
-        ret
+        }
     }
 
     fn update(&mut self, users: Self::Message) {
