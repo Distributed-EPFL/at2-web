@@ -1,18 +1,14 @@
 use drop::crypto::sign;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FullUser {
-    name: String,
+    pub name: String,
     keypair: sign::KeyPair,
 }
 
 impl FullUser {
     pub fn new(name: String, keypair: sign::KeyPair) -> Self {
         Self { name, keypair }
-    }
-
-    pub fn name(&self) -> &str {
-        &self.name
     }
 
     pub fn public_key(&self) -> sign::PublicKey {

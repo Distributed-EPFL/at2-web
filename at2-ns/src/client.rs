@@ -37,14 +37,14 @@ impl Client {
         )))
     }
 
-    pub async fn put(&mut self, user: &FullUser) -> Result<(), Error> {
+    pub async fn put(&mut self, user: FullUser) -> Result<(), Error> {
         self.0
             .put(PutRequest {
                 account: Some(Account {
                     public_key: bincode::serialize(&user.public_key()).context(Serialize)?,
-                    name: user.name().to_owned(),
+                    name: user.name.to_owned(),
                 }),
-                signature: bincode::serialize(&user.sign(&user.name()).context(Signature)?)
+                signature: bincode::serialize(&user.sign(&user.name).context(Signature)?)
                     .context(Serialize)?,
             })
             .await

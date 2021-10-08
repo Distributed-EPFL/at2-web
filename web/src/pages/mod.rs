@@ -6,6 +6,7 @@ mod welcome;
 mod your_account;
 
 use at2_ns::FullUser;
+use drop::crypto::sign;
 use new_account::NewAccount;
 use speedtest::Speedtest;
 pub use style::Style;
@@ -27,7 +28,8 @@ pub struct Pages {
     link: ComponentLink<Self>,
     index: usize,
 
-    user: Option<FullUser>,
+    user: FullUser,
+    user_created: bool,
 }
 
 impl Component for Pages {
@@ -39,7 +41,8 @@ impl Component for Pages {
             link,
             index: 0,
 
-            user: None,
+            user: FullUser::new("".to_owned(), sign::KeyPair::random()),
+            user_created: false,
         }
     }
 
@@ -54,8 +57,8 @@ impl Component for Pages {
                 true
             }
             Self::Message::UserCreated(user) => {
-                debug_assert!(matches!(self.user, None));
-                self.user = Some(*user);
+                self.user = *user;
+                self.user_created = true;
                 true
             }
         }
@@ -67,13 +70,18 @@ impl Component for Pages {
 
     fn view(&self) -> Html {
         html! { <>
-            <div hidden=self.index != 0> <Welcome/> </div>
-            <div hidden=self.index != 1> <NewAccount
-                on_new_user=self.link.callback(Self::Message::UserCreated)
-            /> </div>
-            <div hidden=self.index != 2> <YourAccount/> </div>
-            <div hidden=self.index != 3> <Speedtest/> </div>
-            <div hidden=self.index != 4> <Summary/> </div>
+            { match self.index {
+                0 => html! { <Welcome/> },
+                1 => html! { <NewAccount
+                    on_new_user=self.link.callback(Self::Message::UserCreated)
+                    user=self.user.clone()
+                    user_created=self.user_created
+                /> },
+                2 => html! { <YourAccount/> },
+                3 => html! { <Speedtest/> },
+                4 => html! { <Summary/> },
+                _ => panic!("unreachable"),
+            } }
 
             <div class=classes!("bottom")>
                 <button
@@ -84,7 +92,7 @@ impl Component for Pages {
                 <button
                     onclick=self.link.callback(|_| Self::Message::NextPage)
                     disabled=
-                        self.index+1 == PAGE_COUNT || (self.index == 1 && self.user.is_none())
+                        self.index+1 == PAGE_COUNT || (self.index == 1 && !self.user_created)
                 > { "Next" } </button>
             </div>
         </> }

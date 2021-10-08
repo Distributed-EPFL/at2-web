@@ -2,7 +2,6 @@ use at2_ns::{
     client::{self, Client},
     FullUser,
 };
-use drop::crypto::sign;
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
 
@@ -10,6 +9,8 @@ use crate::config::Config;
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct Properties {
+    pub user: FullUser,
+    pub user_created: bool,
     pub on_new_user: Callback<Box<FullUser>>,
 }
 
@@ -25,8 +26,6 @@ pub struct NewAccount {
 
     client: Client,
 
-    username: String,
-    keypair: sign::KeyPair,
     create_user_error: Option<client::Error>,
 }
 
@@ -41,8 +40,6 @@ impl Component for NewAccount {
             link,
             properties,
             client: Client::new(conf.name_service()),
-            username: "".to_owned(),
-            keypair: sign::KeyPair::random(),
             create_user_error: None,
         }
     }
@@ -50,17 +47,15 @@ impl Component for NewAccount {
     fn update(&mut self, message: Self::Message) -> ShouldRender {
         match message {
             Self::Message::SetUsername(username) => {
-                self.username = username;
+                self.properties.user.name = username;
                 true
             }
             Self::Message::CreateUser => {
-                let user = FullUser::new(self.username.clone(), self.keypair.clone());
-
-                let mut client = self.client.clone();
+                let (user, mut client) = (self.properties.user.clone(), self.client.clone());
                 let callback = self.link.callback(Self::Message::UserPut);
 
                 spawn_local(async move {
-                    callback.emit(client.put(&user).await.map(|_| Box::new(user)))
+                    callback.emit(client.put(user.clone()).await.map(|_| Box::new(user)))
                 });
 
                 false
@@ -82,7 +77,11 @@ impl Component for NewAccount {
     }
 
     fn change(&mut self, properties: Self::Properties) -> ShouldRender {
-        properties != self.properties
+        let ret = properties != self.properties;
+
+        self.properties = properties;
+
+        ret
     }
 
     fn view(&self) -> Html {
@@ -111,12 +110,17 @@ impl Component for NewAccount {
                         oninput=self.link.callback(|event: InputData|
                             Self::Message::SetUsername(event.value))
                         type={ "text" }
+                        value=self.properties.user.name.clone()
                     />
                 </div>
 
                 <button
                     onclick=self.link.callback(|_| Self::Message::CreateUser)
-                > { "Create user" } </button>
+                > { if self.properties.user_created {
+                        "Update username"
+                    } else {
+                        "Create user"
+                } } </button>
 
                 { self.create_user_error.as_ref().map(|err| html! {
                     <p> { format!("error while creating user: {}", err) } </p>
