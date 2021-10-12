@@ -76,16 +76,21 @@ impl Component for Pages {
               bottom: 0;
               width: 100%;
 
-              border-top: solid lightgrey;
+              display: flex;
+              justify-content: space-around;
 
-              text-align: center;
+              border-top: solid lightgrey;
 
               background-color: inherit;
 
               /* override base CSS */
               margin: 0;
             }
-            .bottom > * {
+            .bottom > div {
+              display: flex;
+              justify-content: space-around;
+            }
+            .bottom > div > * {
               margin: 1em;
             }
 
@@ -118,16 +123,18 @@ impl Component for Pages {
             </div>
 
             <div class=classes!("bottom")>
-                <button
-                    onclick=self.link.callback(|_| Self::Message::PreviousPage)
-                    disabled=self.index == 0
-                > { "Previous" } </button>
-                <span>{ format!("{}/{}", self.index + 1, PAGE_COUNT) }</span>
-                <button
-                    onclick=self.link.callback(|_| Self::Message::NextPage)
-                    disabled=
-                        self.index+1 == PAGE_COUNT || (self.index == 1 && !self.user_created)
-                > { "Next" } </button>
+                <div>
+                    <button
+                        onclick=self.link.callback(|_| Self::Message::PreviousPage)
+                        disabled=self.index == 0
+                    > { "Previous" } </button>
+                    <span>{ format!("{}/{}", self.index + 1, PAGE_COUNT) }</span>
+                    <button
+                        onclick=self.link.callback(|_| Self::Message::NextPage)
+                        disabled=
+                            self.index+1 == PAGE_COUNT || (self.index == 1 && !self.user_created)
+                    > { "Next" } </button>
+                </div>
             </div>
         </> }
     }
