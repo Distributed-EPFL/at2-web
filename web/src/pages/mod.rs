@@ -7,6 +7,7 @@ mod your_account;
 
 use at2_ns::FullUser;
 use drop::crypto::sign;
+use material_yew::MatButton;
 use new_account::NewAccount;
 use speedtest::Speedtest;
 pub use style::Style;
@@ -87,6 +88,7 @@ impl Component for Pages {
               margin: 0;
             }
             .bottom > div {
+              align-items: center;
               display: flex;
               justify-content: space-around;
             }
@@ -124,16 +126,22 @@ impl Component for Pages {
 
             <div class=classes!("bottom")>
                 <div>
-                    <button
-                        onclick=self.link.callback(|_| Self::Message::PreviousPage)
-                        disabled=self.index == 0
-                    > { "Previous" } </button>
+                    <span onclick=self.link.callback(|_| Self::Message::PreviousPage)>
+                        <MatButton
+                            label="Previous"
+                            raised=true
+                            disabled=self.index == 0
+                        />
+                    </span>
                     <span>{ format!("{}/{}", self.index + 1, PAGE_COUNT) }</span>
-                    <button
-                        onclick=self.link.callback(|_| Self::Message::NextPage)
-                        disabled=
-                            self.index+1 == PAGE_COUNT || (self.index == 1 && !self.user_created)
-                    > { "Next" } </button>
+                    <span onclick=self.link.callback(|_| Self::Message::NextPage)>
+                        <MatButton
+                            label="Next"
+                            raised=true
+                            disabled=
+                                self.index+1 == PAGE_COUNT || (self.index == 1 && !self.user_created)
+                        />
+                    </span>
                 </div>
             </div>
         </> }
