@@ -1,17 +1,23 @@
+use std::collections::HashMap;
+
 use at2_ns::ThinUser;
-use yew::{prelude::*, worker::Agent};
+use js_sys::{JsString, Reflect};
+use yew::{prelude::*, services::ConsoleService, worker::Agent};
 
 use crate::users_agent::UsersAgent;
 
 pub struct YourAccount {
+    link: ComponentLink<Self>,
+
     #[allow(dead_code)] // never dropped
     users_agent: Box<dyn Bridge<UsersAgent>>,
 
-    users: Vec<ThinUser>,
+    users: HashMap<String, ThinUser>,
 }
 
 pub enum Message {
     UsersAgent(<UsersAgent as Agent>::Output),
+    ClickUser(String),
 }
 
 impl Component for YourAccount {
@@ -19,22 +25,26 @@ impl Component for YourAccount {
     type Message = Message;
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let users_agent = UsersAgent::bridge(link.callback(Self::Message::UsersAgent));
-
         Self {
-            users_agent,
-            users: Vec::new(),
+            users_agent: UsersAgent::bridge(link.callback(Self::Message::UsersAgent)),
+            link,
+            users: HashMap::new(),
         }
     }
 
     fn update(&mut self, message: Self::Message) -> ShouldRender {
         match message {
             Self::Message::UsersAgent(users) => {
-                let mut users = users.into_iter().collect::<Vec<_>>();
-                users.sort_by(|u1, u2| u1.name().cmp(u2.name()));
-
-                self.users = users;
+                self.users = users
+                    .into_iter()
+                    .map(|user| (user.name().to_owned(), user))
+                    .collect();
                 true
+            }
+            Self::Message::ClickUser(username) => {
+                let user = self.users.get(&username);
+                ConsoleService::info(&format!("click user: {:?}", user));
+                false
             }
         }
     }
@@ -44,6 +54,9 @@ impl Component for YourAccount {
     }
 
     fn view(&self) -> Html {
+        let mut users = self.users.keys().collect::<Vec<_>>();
+        users.sort();
+
         struct Transaction<'a> {
             started: &'a str,
             from: &'a str,
@@ -94,8 +107,20 @@ impl Component for YourAccount {
             <h2> { "Addressbook" } </h2>
 
             <span class=classes!("boxes")>
-                { for self.users.iter().map(|user| html! {
-                    <p> { user.name() } </p>
+                { for users.iter().map(|user| html! {
+                    <p
+                        onclick=self.link.callback(|event: MouseEvent|
+                            Self::Message::ClickUser(
+                                Reflect::get(
+                                    event.target().unwrap().as_ref(),
+                                    &JsString::from("textContent"),
+                                )
+                                .unwrap()
+                                .as_string()
+                                .unwrap()
+                            )
+                        )
+                    > { user } </p>
                 }) }
             </span>
 
