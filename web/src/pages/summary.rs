@@ -22,7 +22,7 @@ impl Component for Summary {
         html! { <div class=classes!("page")>
             <h1> { "Summary" } </h1>
 
-            <p> { "We showned that AT2 is faster than bitcoin." } </p>
+            <p> { "We showed that AT2 is faster than bitcoin." } </p>
         </div> }
     }
 }
