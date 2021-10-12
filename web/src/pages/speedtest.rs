@@ -69,7 +69,7 @@ impl Component for Speedtest {
     }
 
     fn view(&self) -> Html {
-        html! { <div class=classes!("page")>
+        html! { <>
             <h1> { "Speedtest" } </h1>
 
             <p>
@@ -143,6 +143,6 @@ impl Component for Speedtest {
                 </div>
             </div>
 
-        </div> }
+        </> }
     }
 }

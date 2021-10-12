@@ -88,7 +88,7 @@ impl Component for NewAccount {
         // TODO fetch network
         let network = ["C4DT", "DCL", "ineiti"];
 
-        html! { <div class=classes!("page")>
+        html! { <>
             <h1> { "New account" } </h1>
 
             <p>
@@ -135,6 +135,6 @@ impl Component for NewAccount {
                     <p> { node } </p>
                 }) }
             </span>
-        </div> }
+        </> }
     }
 }

@@ -89,7 +89,7 @@ impl Component for YourAccount {
             },
         ];
 
-        html! { <div class=classes!("page")>
+        html! { <>
             <h1> { "Your account" } </h1>
 
             <p>
@@ -145,6 +145,6 @@ impl Component for YourAccount {
                 }) }
             </table>
 
-        </div> }
+        </> }
     }
 }

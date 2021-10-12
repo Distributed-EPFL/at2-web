@@ -19,10 +19,10 @@ impl Component for Summary {
     }
 
     fn view(&self) -> Html {
-        html! { <div class=classes!("page")>
+        html! { <>
             <h1> { "Summary" } </h1>
 
             <p> { "We showed that AT2 is faster than bitcoin." } </p>
-        </div> }
+        </> }
     }
 }

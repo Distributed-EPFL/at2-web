@@ -70,18 +70,52 @@ impl Component for Pages {
 
     fn view(&self) -> Html {
         html! { <>
-            { match self.index {
-                0 => html! { <Welcome/> },
-                1 => html! { <NewAccount
-                    on_new_user=self.link.callback(Self::Message::UserCreated)
-                    user=self.user.clone()
-                    user_created=self.user_created
-                /> },
-                2 => html! { <YourAccount/> },
-                3 => html! { <Speedtest/> },
-                4 => html! { <Summary/> },
-                _ => panic!("unreachable"),
-            } }
+            <style> { "
+            .bottom {
+              position: fixed;
+              bottom: 0;
+              width: 100%;
+
+              border-top: solid lightgrey;
+
+              text-align: center;
+
+              background-color: inherit;
+
+              /* override base CSS */
+              margin: 0;
+            }
+            .bottom > * {
+              margin: 1em;
+            }
+
+            .page {
+                text-align: center;
+
+                width: 40em;
+                margin: 10em auto;
+            }
+            .page > * {
+                margin: 2em auto;
+            }
+            .page > p {
+                text-align: justify;
+            }" } </style>
+
+            <div class=classes!("page")>
+                { match self.index {
+                    0 => html! { <Welcome/> },
+                    1 => html! { <NewAccount
+                        on_new_user=self.link.callback(Self::Message::UserCreated)
+                        user=self.user.clone()
+                        user_created=self.user_created
+                    /> },
+                    2 => html! { <YourAccount/> },
+                    3 => html! { <Speedtest/> },
+                    4 => html! { <Summary/> },
+                    _ => panic!("unreachable"),
+                } }
+            </div>
 
             <div class=classes!("bottom")>
                 <button

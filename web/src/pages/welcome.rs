@@ -19,7 +19,7 @@ impl Component for Welcome {
     }
 
     fn view(&self) -> Html {
-        html! { <div class=classes!("page")>
+        html! { <>
             <h1> { "Welcome to AT2" } </h1>
 
             <p> { "
@@ -40,6 +40,6 @@ impl Component for Welcome {
                 a speed test where you will send as many transaction as you
                 want and measure how well the network is handling the load.
             " } </p>
-        </div> }
+        </> }
     }
 }
