@@ -2,6 +2,7 @@ use at2_ns::{
     client::{self, Client},
     FullUser,
 };
+use material_yew::{MatButton, MatList, MatListItem, MatTextField};
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
 
@@ -104,23 +105,25 @@ impl Component for NewAccount {
                 "flex-direction: column;",
                 "align-items: center;",
             )>
-                <div style="display: flex; padding: 1em 0em">
-                    <label> { "Enter your username" } </label>
-                    <input
-                        oninput=self.link.callback(|event: InputData|
-                            Self::Message::SetUsername(event.value))
-                        type={ "text" }
-                        value=self.properties.user.name.clone()
-                    />
-                </div>
+                <MatList>
+                    <MatListItem>
+                        <MatTextField
+                            label="Enter your username"
+                            oninput=self.link.callback(|event: InputData|
+                                Self::Message::SetUsername(event.value))
+                            value=self.properties.user.name.clone()
+                        />
+                    </MatListItem>
 
-                <button
-                    onclick=self.link.callback(|_| Self::Message::CreateUser)
-                > { if self.properties.user_created {
-                        "Update username"
-                    } else {
-                        "Create user"
-                } } </button>
+                    <MatListItem>
+                        <span
+                            onclick=self.link.callback(|_| Self::Message::CreateUser)
+                        ><MatButton
+                            label=if self.properties.user_created { "Update username" } else { "Create user" }
+                            raised=true
+                        /></span>
+                    </MatListItem>
+                </MatList>
 
                 { self.create_user_error.as_ref().map(|err| html! {
                     <p> { format!("error while creating user: {}", err) } </p>
@@ -132,7 +135,10 @@ impl Component for NewAccount {
             <h2> { "Network" } </h2>
             <span class=classes!("boxes") >
                 { for network.iter().map(|node| html! {
-                    <p> { node } </p>
+                    <MatButton
+                        label=node.to_owned()
+                        outlined=true
+                    />
                 }) }
             </span>
         </> }

@@ -20,6 +20,10 @@ impl Component for Style {
 
     fn view(&self) -> Html {
         html! { <style> { "
+            body {
+                font-family: Roboto, sans-serif;
+            }
+
             .boxes {
                 display: flex;
                 align-items: center;
