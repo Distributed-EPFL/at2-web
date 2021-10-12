@@ -26,15 +26,14 @@ xdg-open localhost:8080
 trunk build --release
 ```
 
-### dns
+### at2-ns
 
 The demonstrator needs a way to map users' public keys to human readable names,
 it needs a name service. As the network is already existing, the demo uses
-EPFL's one. But if you feel adventurous, you can spin your own network
-following
-[at2-node's readme](https://github.com/Distributed-EPFL/at2-node#readme) and
-spin your local name service
+EPFL's one. But if you feel adventurous, you can spin your own name service.
 
 ```sh
-cargo run 127.0.0.1:1234
+cargo run --features server 127.0.0.1:1234
 ```
+
+You can then modify `web/src/config.rs` to point to your local service.
