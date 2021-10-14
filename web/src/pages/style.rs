@@ -22,6 +22,7 @@ impl Component for Style {
         html! { <style> { "
             body {
                 font-family: Roboto, sans-serif;
+                margin-left: 0px;
             }
 
             .boxes {
