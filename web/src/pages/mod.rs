@@ -82,10 +82,15 @@ impl Component for Pages {
 
               border-top: solid lightgrey;
 
-              background-color: inherit;
+              background-color: white;
 
               /* override base CSS */
               margin: 0;
+            }
+            @media (prefers-color-scheme: dark) {
+                .bottom {
+                  background-color: inherit;
+                }
             }
             .bottom > div {
               align-items: center;
@@ -107,7 +112,8 @@ impl Component for Pages {
             }
             .page > p {
                 text-align: justify;
-            }" } </style>
+            }
+            " } </style>
 
             <div class=classes!("page")>
                 { match self.index {
