@@ -1,2 +1,5 @@
 [licenses]
 allow-osi-fsf-free = "either"
+
+[sources.allow-org]
+github = ["Distributed-EPFL"]
