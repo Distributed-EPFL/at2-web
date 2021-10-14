@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use at2_ns::ThinUser;
 use js_sys::{JsString, Reflect};
+use material_yew::MatButton;
 use yew::{prelude::*, services::ConsoleService, worker::Agent};
 
 use crate::users_agent::UsersAgent;
@@ -54,8 +55,8 @@ impl Component for YourAccount {
     }
 
     fn view(&self) -> Html {
-        let mut users = self.users.keys().collect::<Vec<_>>();
-        users.sort();
+        let mut usernames = self.users.keys().cloned().collect::<Vec<_>>();
+        usernames.sort();
 
         struct Transaction<'a> {
             started: &'a str,
@@ -107,8 +108,8 @@ impl Component for YourAccount {
             <h2> { "Addressbook" } </h2>
 
             <span class=classes!("boxes")>
-                { for users.iter().map(|user| html! {
-                    <p
+                { for usernames.into_iter().map(|username| html! {
+                    <span
                         onclick=self.link.callback(|event: MouseEvent|
                             Self::Message::ClickUser(
                                 Reflect::get(
@@ -120,7 +121,10 @@ impl Component for YourAccount {
                                 .unwrap()
                             )
                         )
-                    > { user } </p>
+                    ><MatButton
+                        label=username
+                        raised=true
+                    /></span>
                 }) }
             </span>
 
