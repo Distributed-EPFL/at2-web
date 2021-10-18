@@ -10,6 +10,9 @@ use crate::{
 
 #[derive(Debug, Snafu)]
 pub enum Error {
+    Deserialize {
+        source: bincode::Error,
+    },
     Serialize {
         source: bincode::Error,
     },
@@ -53,17 +56,18 @@ impl Client {
     }
 
     pub async fn get_all(&mut self) -> Result<HashSet<ThinUser>, Error> {
-        self.0
-            .get_all(GetAllRequest {})
-            .await
-            .context(Rpc)
-            .map(|reply| {
-                reply
-                    .into_inner()
-                    .accounts
-                    .iter()
-                    .map(|account| ThinUser::new(account.name.clone()))
-                    .collect()
+        let reply = self.0.get_all(GetAllRequest {}).await.context(Rpc)?;
+
+        reply
+            .into_inner()
+            .accounts
+            .iter()
+            .map(|account| {
+                Ok(ThinUser::new(
+                    account.name.clone(),
+                    bincode::deserialize(&account.public_key).context(Deserialize)?,
+                ))
             })
+            .collect::<Result<HashSet<_>, _>>()
     }
 }
