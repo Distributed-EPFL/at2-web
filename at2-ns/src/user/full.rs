@@ -15,10 +15,7 @@ impl FullUser {
         self.keypair.public()
     }
 
-    pub fn sign(
-        &self,
-        message: &impl serde::Serialize,
-    ) -> Result<sign::Signature, sign::SignError> {
-        self.keypair.sign(message)
+    pub fn keypair(&self) -> &sign::KeyPair {
+        &self.keypair
     }
 }

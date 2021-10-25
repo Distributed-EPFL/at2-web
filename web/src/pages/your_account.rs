@@ -1,14 +1,14 @@
 use std::{borrow::Cow, collections::HashMap, fmt, mem};
 
-use at2_ns::ThinUser;
+use at2_ns::{FullUser, ThinUser};
 use js_sys::{JsString, Reflect};
 use material_yew::{
     dialog::{ActionType, MatDialogAction},
     MatButton, MatDialog, MatFormfield, MatList, MatListItem, WeakComponentLink,
 };
-use yew::{prelude::*, services::ConsoleService, worker::Agent};
+use yew::{prelude::*, worker::Agent};
 
-use crate::users_agent::UsersAgent;
+use crate::agents;
 
 const DEFAULT_SEND_TRANSACTION_AMOUNT: usize = 12;
 
@@ -53,11 +53,19 @@ impl SendTransactionBuilder {
     }
 }
 
+#[derive(Properties, Clone)]
+pub struct Properties {
+    pub user: FullUser,
+}
+
 pub struct YourAccount {
     link: ComponentLink<Self>,
 
+    props: Properties,
+
     #[allow(dead_code)] // never dropped
-    users_agent: Box<dyn Bridge<UsersAgent>>,
+    get_users_agent: Box<dyn Bridge<agents::GetUsers>>,
+    send_asset_agent: Box<dyn Bridge<agents::SendAsset>>,
 
     users: HashMap<String, ThinUser>,
 
@@ -66,7 +74,8 @@ pub struct YourAccount {
 }
 
 pub enum Message {
-    UsersAgent(<UsersAgent as Agent>::Output),
+    GotUsers(<agents::GetUsers as Agent>::Output),
+    AssetSent(<agents::SendAsset as Agent>::Output),
 
     ClickUser(String),
     UpdateAmountToSend(usize),
@@ -75,13 +84,15 @@ pub enum Message {
 }
 
 impl Component for YourAccount {
-    type Properties = ();
+    type Properties = Properties;
     type Message = Message;
 
-    fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         Self {
-            users_agent: UsersAgent::bridge(link.callback(Self::Message::UsersAgent)),
-            link,
+            link: link.clone(),
+            props,
+            get_users_agent: agents::GetUsers::bridge(link.callback(Self::Message::GotUsers)),
+            send_asset_agent: agents::SendAsset::bridge(link.callback(Self::Message::AssetSent)),
             users: HashMap::new(),
             send_transaction_dialog: Default::default(),
             send_transaction_builder: Default::default(),
@@ -90,7 +101,7 @@ impl Component for YourAccount {
 
     fn update(&mut self, message: Self::Message) -> ShouldRender {
         match message {
-            Self::Message::UsersAgent(users) => {
+            Self::Message::GotUsers(users) => {
                 self.users = users
                     .into_iter()
                     .map(|user| (user.name().to_owned(), user))
@@ -109,12 +120,21 @@ impl Component for YourAccount {
             }
             Self::Message::SendTransaction => {
                 let builder = mem::take(&mut self.send_transaction_builder);
-                let (user, amount) = builder.build().unwrap();
-                ConsoleService::info(&format!("send transaction: {} to {:?}", amount, user));
+                let user = self.props.user.clone();
+                let (recipient, amount) = builder.build().unwrap();
+                let sequence = 1; // TODO retrieve latest sequence
+
+                self.send_asset_agent
+                    .send((user, sequence, recipient, amount as u64));
+
                 false
             }
             Self::Message::CancelSendTransaction => {
                 self.send_transaction_builder = SendTransactionBuilder::default();
+                false
+            }
+            Self::Message::AssetSent(ret) => {
+                ret.unwrap(); // TODO unwrap
                 false
             }
         }

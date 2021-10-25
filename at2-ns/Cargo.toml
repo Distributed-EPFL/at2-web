@@ -11,7 +11,7 @@ tonic = { version = "0.5", default-features = false, features = ["codegen", "pro
 
 # bins
 bincode = { version = "1", optional = true }
-drop = { git = "https://github.com/Distributed-EPFL/drop.git", branch = "add-wasm", optional = true }
+drop = { git = "https://github.com/Distributed-EPFL/drop.git", optional = true }
 
 # client
 grpc-web-client = { git = "https://github.com/titanous/grpc-web-client", branch = "main", optional = true }

@@ -3,13 +3,13 @@ use std::collections::HashSet;
 use at2_ns::ThinUser;
 use yew::{prelude::*, worker::Agent};
 
-use crate::users_agent::UsersAgent;
+use crate::agents;
 
 pub struct Speedtest {
     link: ComponentLink<Self>,
 
     #[allow(dead_code)] // never dropped
-    users_agent: Box<dyn Bridge<UsersAgent>>,
+    users_agent: Box<dyn Bridge<agents::GetUsers>>,
     users: HashSet<ThinUser>,
 
     is_running: bool,
@@ -18,7 +18,7 @@ pub struct Speedtest {
 }
 
 pub enum Message {
-    UsersAgent(<UsersAgent as Agent>::Output),
+    GotUsers(<agents::GetUsers as Agent>::Output),
     UpdateTransactionAmount(usize),
     UpdateUser(String),
     Start,
@@ -29,7 +29,7 @@ impl Component for Speedtest {
     type Message = Message;
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let users_agent = UsersAgent::bridge(link.callback(Self::Message::UsersAgent));
+        let users_agent = agents::GetUsers::bridge(link.callback(Self::Message::GotUsers));
 
         Self {
             link,
@@ -43,7 +43,7 @@ impl Component for Speedtest {
 
     fn update(&mut self, message: Self::Message) -> ShouldRender {
         match message {
-            Self::Message::UsersAgent(users) => {
+            Self::Message::GotUsers(users) => {
                 self.users = users;
                 true
             }

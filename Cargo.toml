@@ -1,2 +1,3 @@
 [workspace]
 members = ["at2-ns", "web"]
+resolver = "2"

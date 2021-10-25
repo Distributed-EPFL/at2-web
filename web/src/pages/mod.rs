@@ -123,7 +123,9 @@ impl Component for Pages {
                         user=self.user.clone()
                         user_created=self.user_created
                     /> },
-                    2 => html! { <YourAccount/> },
+                    2 => html! { <YourAccount
+                        user=self.user.clone()
+                    /> },
                     3 => html! { <Speedtest/> },
                     4 => html! { <Summary/> },
                     _ => panic!("unreachable"),
