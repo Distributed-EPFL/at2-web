@@ -7,7 +7,7 @@ use yew::{services::ConsoleService, worker::*};
 
 use crate::config::Config;
 
-pub struct UsersAgent {
+pub struct GetUsers {
     link: AgentLink<Self>,
 
     #[allow(dead_code)] // drop when agent is destroyed
@@ -17,7 +17,7 @@ pub struct UsersAgent {
     subscribers: HashSet<HandlerId>,
 }
 
-impl Agent for UsersAgent {
+impl Agent for GetUsers {
     type Reach = Context<Self>;
     type Message = HashSet<ThinUser>;
     type Input = ();

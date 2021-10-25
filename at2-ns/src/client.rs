@@ -47,7 +47,7 @@ impl Client {
                     public_key: bincode::serialize(&user.public_key()).context(Serialize)?,
                     name: user.name.to_owned(),
                 }),
-                signature: bincode::serialize(&user.sign(&user.name).context(Signature)?)
+                signature: bincode::serialize(&user.keypair().sign(&user.name).context(Signature)?)
                     .context(Serialize)?,
             })
             .await

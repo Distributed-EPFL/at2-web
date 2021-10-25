@@ -1,8 +1,8 @@
 use yew::prelude::*;
 
-mod pages;
 mod config;
-mod users_agent;
+mod pages;
+mod agents;
 
 fn main() {
     yew::start_app::<App>();
