@@ -29,7 +29,7 @@ jobs:
         name: cargo build
         with:
           command: build
-          args: --bin server --features server
+          args: --bin server --features server --release
 
       - uses: kielabokkie/ssh-key-and-known-hosts-action@v1.2.0
         with:
@@ -38,7 +38,7 @@ jobs:
 
       - name: rsync repository
         run: >
-          rsync --archive "$GITHUB_WORKSPACE/target/debug/server"
+          rsync --archive "$GITHUB_WORKSPACE/target/release/server"
           "${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:at2-ns"
 
       - name: rebuild docker-compose
@@ -67,7 +67,7 @@ jobs:
           command: install
           args: trunk wasm-bindgen-cli
 
-      - run: trunk build web/index.html
+      - run: trunk build web/index.html --release
 
       - name: FIXME patch thedodd/trunk#196
         run: sed -e s,\"/index-,\"index-,g -e s,\'/index-,\'./index-, -e s,\'/index-,\'index-, -i web/dist/index.html
