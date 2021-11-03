@@ -19,6 +19,7 @@ pub enum Error {
     Signature {
         source: drop::crypto::sign::SignError,
     },
+    #[snafu(display("server answered: {}", source.message()))]
     Rpc {
         source: tonic::Status,
     },
