@@ -1,4 +1,4 @@
-use std::{borrow::Cow, collections::HashMap, fmt, mem};
+use std::{borrow::Cow, collections::HashMap, mem};
 
 use at2_ns::{FullUser, ThinUser};
 use js_sys::{JsString, Reflect};
@@ -10,48 +10,8 @@ use yew::{prelude::*, worker::Agent};
 
 use crate::agents;
 
-const DEFAULT_SEND_TRANSACTION_AMOUNT: usize = 12;
-
-// TODO snafu?
-#[derive(Debug)]
-struct MissingField;
-
-impl fmt::Display for MissingField {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("missing field")
-    }
-}
-impl std::error::Error for MissingField {}
-
-// TODO split
-pub struct SendTransactionBuilder {
-    amount: usize,
-    user: Option<ThinUser>,
-}
-
-impl Default for SendTransactionBuilder {
-    fn default() -> Self {
-        Self {
-            amount: DEFAULT_SEND_TRANSACTION_AMOUNT,
-            user: None,
-        }
-    }
-}
-
-impl SendTransactionBuilder {
-    fn set_amount(&mut self, amount: usize) {
-        self.amount = amount;
-    }
-    fn set_user(&mut self, user: ThinUser) {
-        self.user = Some(user);
-    }
-    fn build(self) -> Result<(ThinUser, usize), MissingField> {
-        match self.user {
-            Some(user) => Ok((user, self.amount)),
-            None => Err(MissingField),
-        }
-    }
-}
+mod send_transaction_builder;
+use send_transaction_builder::{SendTransactionBuilder, DEFAULT_SEND_TRANSACTION_AMOUNT};
 
 #[derive(Properties, Clone)]
 pub struct Properties {
