@@ -2,7 +2,7 @@ use at2_ns::{
     client::{self, Client},
     FullUser,
 };
-use material_yew::{MatButton, MatList, MatListItem, MatTextField};
+use material_yew::{MatButton, MatTextField};
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
 
@@ -103,30 +103,29 @@ impl Component for NewAccount {
             <div style=concat!(
                 "display: flex;",
                 "flex-direction: column;",
-                "align-items: center;",
             )>
-                <MatList>
-                    <MatListItem>
-                        <MatTextField
-                            label="Enter your username"
-                            oninput=self.link.callback(|event: InputData|
-                                Self::Message::SetUsername(event.value))
-                            value=self.properties.user.name.clone()
-                        />
-                    </MatListItem>
+                <div style=concat!(
+                    "display: flex;",
+                    "justify-content: space-around;",
+                    "align-items: center;",
+                )>
+                    <MatTextField
+                        label="Enter your username"
+                        oninput=self.link.callback(|event: InputData|
+                            Self::Message::SetUsername(event.value))
+                        value=self.properties.user.name.clone()
+                    />
 
-                    <MatListItem>
-                        <span
-                            onclick=self.link.callback(|_| Self::Message::CreateUser)
-                        ><MatButton
-                            label=if self.properties.user_created { "Update username" } else { "Create user" }
-                            raised=true
-                        /></span>
-                    </MatListItem>
-                </MatList>
+                    <span
+                        onclick=self.link.callback(|_| Self::Message::CreateUser)
+                    ><MatButton
+                        label=if self.properties.user_created { "Update username" } else { "Create user" }
+                        raised=true
+                    /></span>
+                </div>
 
                 { self.create_user_error.as_ref().map(|err| html! {
-                    <p> { format!("error while creating user: {}", err) } </p>
+                    <p style="color: red"> { format!("error while creating user: {}", err) } </p>
                 }).unwrap_or_else(|| html! {}) }
             </div>
 
