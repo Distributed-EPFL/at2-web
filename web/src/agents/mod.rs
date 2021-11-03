@@ -1,5 +1,7 @@
-mod users;
-mod node;
+//! Yew agents handling asynchronous calls to services
 
-pub use users::GetUsers;
+mod node;
+mod users;
+
 pub use node::*;
+pub use users::GetUsers;
