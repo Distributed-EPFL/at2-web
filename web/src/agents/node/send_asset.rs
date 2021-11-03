@@ -5,6 +5,7 @@ use yew::worker::*;
 
 use crate::config::Config;
 
+/// Send an asset on the network
 pub struct SendAsset {
     link: AgentLink<Self>,
     client: Client,

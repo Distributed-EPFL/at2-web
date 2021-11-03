@@ -7,6 +7,7 @@ use yew::{services::ConsoleService, worker::*};
 
 use crate::config::Config;
 
+/// Get the users registered on the name service
 pub struct GetUsers {
     link: AgentLink<Self>,
 
