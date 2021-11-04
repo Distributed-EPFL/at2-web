@@ -1,17 +1,15 @@
-use std::{borrow::Cow, collections::HashMap, mem};
+use std::collections::HashMap;
 
 use at2_ns::{FullUser, ThinUser};
 use js_sys::{JsString, Reflect};
-use material_yew::{
-    dialog::{ActionType, MatDialogAction},
-    MatButton, MatDialog, MatFormfield, MatList, MatListItem, WeakComponentLink,
-};
+use material_yew::{MatButton, MatDialog, WeakComponentLink};
 use yew::{prelude::*, worker::Agent};
 
 use crate::agents;
 
+mod send_transaction_dialog;
+use send_transaction_dialog::SendTransactionDialog;
 mod transaction_builder;
-use transaction_builder::TransactionBuilder;
 
 #[derive(Properties, Clone)]
 pub struct Properties {
@@ -25,25 +23,20 @@ pub struct YourAccount {
 
     #[allow(dead_code)] // never dropped
     get_users_agent: Box<dyn Bridge<agents::GetUsers>>,
-    get_balance_agent: Box<dyn Bridge<agents::GetBalance>>,
     send_asset_agent: Box<dyn Bridge<agents::SendAsset>>,
 
     users: HashMap<String, ThinUser>,
-    current_user_balance: Option<u64>,
 
-    send_transaction_dialog: WeakComponentLink<MatDialog>,
-    transaction_builder: TransactionBuilder,
+    dialog_link: WeakComponentLink<MatDialog>,
+    dialog_user: Option<ThinUser>,
 }
 
 pub enum Message {
     GotUsers(<agents::GetUsers as Agent>::Output),
-    GotBalance(<agents::GetBalance as Agent>::Output),
     AssetSent(<agents::SendAsset as Agent>::Output),
 
     ClickUser(String),
-    UpdateAmountToSend(usize),
-    SendTransaction,
-    CancelSendTransaction,
+    SendTransaction((ThinUser, usize)),
 }
 
 impl Component for YourAccount {
@@ -55,12 +48,10 @@ impl Component for YourAccount {
             link: link.clone(),
             props,
             get_users_agent: agents::GetUsers::bridge(link.callback(Self::Message::GotUsers)),
-            get_balance_agent: agents::GetBalance::bridge(link.callback(Self::Message::GotBalance)),
             send_asset_agent: agents::SendAsset::bridge(link.callback(Self::Message::AssetSent)),
             users: HashMap::new(),
-            current_user_balance: None,
-            send_transaction_dialog: Default::default(),
-            transaction_builder: Default::default(),
+            dialog_link: Default::default(),
+            dialog_user: None,
         }
     }
 
@@ -75,41 +66,26 @@ impl Component for YourAccount {
             }
             Self::Message::ClickUser(ref username) => {
                 let user = self.users.get(username).unwrap().to_owned();
-                self.get_balance_agent.send(user.clone());
-                self.transaction_builder.user = Some(user);
-                self.send_transaction_dialog.show();
-                false
-            }
-            Self::Message::UpdateAmountToSend(amount) => {
-                self.transaction_builder.amount = amount;
-                false
-            }
-            Self::Message::SendTransaction => {
-                self.current_user_balance = None;
 
-                let builder = mem::take(&mut self.transaction_builder);
-                let user = self.props.user.clone();
-                let (recipient, amount) = builder.build().unwrap();
+                self.dialog_user = Some(user);
+                self.dialog_link.show();
+                false
+            }
+            Self::Message::SendTransaction((recipient, amount)) => {
                 let sequence = 1; // TODO retrieve latest sequence
 
-                self.send_asset_agent
-                    .send((user, sequence, recipient, amount as u64));
+                self.send_asset_agent.send((
+                    self.props.user.clone(),
+                    sequence,
+                    recipient,
+                    amount as u64,
+                ));
 
-                false
-            }
-            Self::Message::CancelSendTransaction => {
-                self.current_user_balance = None;
-
-                self.transaction_builder = TransactionBuilder::default();
                 false
             }
             Self::Message::AssetSent(ret) => {
                 ret.unwrap(); // TODO unwrap
                 false
-            }
-            Self::Message::GotBalance(ret) => {
-                self.current_user_balance = Some(ret.unwrap()); // TODO unwrap
-                true
             }
         }
     }
@@ -172,7 +148,7 @@ impl Component for YourAccount {
             <h2> { "Addressbook" } </h2>
 
             <span class=classes!("boxes")>
-                { for users.into_iter().map(|user| html! { <>
+                { for users.into_iter().map(|user| html! {
                     <span
                         onclick=self.link.callback(|event: MouseEvent|
                             Self::Message::ClickUser(
@@ -189,51 +165,14 @@ impl Component for YourAccount {
                         label=user.name().to_owned()
                         raised=true
                     /></span>
-
-                    <MatDialog
-                        heading=Cow::from(user.name().to_owned())
-                        dialog_link=self.send_transaction_dialog.clone()
-                        onclosed=self.link.callback(|action: String| match action.as_str() {
-                            "send" => Self::Message::SendTransaction,
-                            "cancel" => Self::Message::CancelSendTransaction,
-                            _ => unreachable!(),
-                        })
-                    >
-                        <MatList >
-                            <MatListItem>
-                                { "Balance: " }
-                                { self.current_user_balance
-                                    .map(|balance| html! { format!("{}¤", balance) })
-                                    .unwrap_or(html! { <span style="color: lightgrey"> { "fetching" } </span> }) }
-                            </MatListItem>
-                            <MatListItem> { format!("Public key: {}", user.public_key()) } </MatListItem>
-                            <MatListItem>
-                                <MatFormfield
-                                    label="Amount to send"
-                                    align_end=true
-                                ><input
-                                    value=self.transaction_builder.amount.to_string()
-                                    oninput=self.link.callback(|event: InputData|
-                                        Self::Message::UpdateAmountToSend(event.value.parse().unwrap())
-                                    )
-                                    type="number"
-                                /></MatFormfield>
-                            </MatListItem>
-                        </MatList>
-
-                        <MatDialogAction
-                            action_type=ActionType::Primary
-                            action=Cow::from("send")>
-                            <MatButton label="Send" />
-                        </MatDialogAction>
-                        <MatDialogAction
-                            action_type=ActionType::Secondary
-                            action=Cow::from("cancel")>
-                            <MatButton label="Cancel" />
-                        </MatDialogAction>
-                    </MatDialog>
-                </> }) }
+                } ) }
             </span>
+
+            <SendTransactionDialog
+                dialog_link=self.dialog_link.clone()
+                user=self.dialog_user.clone()
+                on_send=self.link.callback(Self::Message::SendTransaction)
+            />
 
             <hr />
 
