@@ -25,9 +25,11 @@ pub struct YourAccount {
 
     #[allow(dead_code)] // never dropped
     get_users_agent: Box<dyn Bridge<agents::GetUsers>>,
+    get_balance_agent: Box<dyn Bridge<agents::GetBalance>>,
     send_asset_agent: Box<dyn Bridge<agents::SendAsset>>,
 
     users: HashMap<String, ThinUser>,
+    current_user_balance: Option<u64>,
 
     send_transaction_dialog: WeakComponentLink<MatDialog>,
     send_transaction_builder: SendTransactionBuilder,
@@ -35,6 +37,7 @@ pub struct YourAccount {
 
 pub enum Message {
     GotUsers(<agents::GetUsers as Agent>::Output),
+    GotBalance(<agents::GetBalance as Agent>::Output),
     AssetSent(<agents::SendAsset as Agent>::Output),
 
     ClickUser(String),
@@ -52,8 +55,10 @@ impl Component for YourAccount {
             link: link.clone(),
             props,
             get_users_agent: agents::GetUsers::bridge(link.callback(Self::Message::GotUsers)),
+            get_balance_agent: agents::GetBalance::bridge(link.callback(Self::Message::GotBalance)),
             send_asset_agent: agents::SendAsset::bridge(link.callback(Self::Message::AssetSent)),
             users: HashMap::new(),
+            current_user_balance: None,
             send_transaction_dialog: Default::default(),
             send_transaction_builder: Default::default(),
         }
@@ -70,6 +75,7 @@ impl Component for YourAccount {
             }
             Self::Message::ClickUser(ref username) => {
                 let user = self.users.get(username).unwrap().to_owned();
+                self.get_balance_agent.send(user.clone());
                 self.send_transaction_builder.set_user(user);
                 self.send_transaction_dialog.show();
                 false
@@ -79,6 +85,8 @@ impl Component for YourAccount {
                 false
             }
             Self::Message::SendTransaction => {
+                self.current_user_balance = None;
+
                 let builder = mem::take(&mut self.send_transaction_builder);
                 let user = self.props.user.clone();
                 let (recipient, amount) = builder.build().unwrap();
@@ -90,12 +98,18 @@ impl Component for YourAccount {
                 false
             }
             Self::Message::CancelSendTransaction => {
+                self.current_user_balance = None;
+
                 self.send_transaction_builder = SendTransactionBuilder::default();
                 false
             }
             Self::Message::AssetSent(ret) => {
                 ret.unwrap(); // TODO unwrap
                 false
+            }
+            Self::Message::GotBalance(ret) => {
+                self.current_user_balance = Some(ret.unwrap()); // TODO unwrap
+                true
             }
         }
     }
@@ -186,7 +200,12 @@ impl Component for YourAccount {
                         })
                     >
                         <MatList >
-                            <MatListItem> { "Balance: ¤" } </MatListItem>
+                            <MatListItem>
+                                { "Balance: " }
+                                { self.current_user_balance
+                                    .map(|balance| html! { format!("{}¤", balance) })
+                                    .unwrap_or(html! { <span style="color: lightgrey"> { "fetching" } </span> }) }
+                            </MatListItem>
                             <MatListItem> { format!("Public key: {}", user.public_key()) } </MatListItem>
                             <MatListItem>
                                 <MatFormfield

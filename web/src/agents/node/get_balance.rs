@@ -5,7 +5,7 @@ use yew::worker::*;
 
 use crate::config::Config;
 
-/// Get the balance of an user
+/// Get the balance of a user
 pub struct GetBalance {
     link: AgentLink<Self>,
     client: Client,
