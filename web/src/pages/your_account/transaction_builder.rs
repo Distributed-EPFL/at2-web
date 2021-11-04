@@ -1,7 +1,7 @@
 use at2_ns::ThinUser;
 use snafu::Snafu;
 
-pub const DEFAULT_SEND_TRANSACTION_AMOUNT: usize = 12;
+const DEFAULT_SEND_TRANSACTION_AMOUNT: usize = 12;
 
 #[derive(Snafu, Debug)]
 pub enum Error {
@@ -9,12 +9,12 @@ pub enum Error {
     MissingField,
 }
 
-pub struct SendTransactionBuilder {
-    amount: usize,
-    user: Option<ThinUser>,
+pub struct TransactionBuilder {
+    pub amount: usize,
+    pub user: Option<ThinUser>,
 }
 
-impl Default for SendTransactionBuilder {
+impl Default for TransactionBuilder {
     fn default() -> Self {
         Self {
             amount: DEFAULT_SEND_TRANSACTION_AMOUNT,
@@ -23,15 +23,7 @@ impl Default for SendTransactionBuilder {
     }
 }
 
-impl SendTransactionBuilder {
-    pub fn set_amount(&mut self, amount: usize) {
-        self.amount = amount;
-    }
-
-    pub fn set_user(&mut self, user: ThinUser) {
-        self.user = Some(user);
-    }
-
+impl TransactionBuilder {
     pub fn build(self) -> Result<(ThinUser, usize), Error> {
         match self.user {
             Some(user) => Ok((user, self.amount)),
