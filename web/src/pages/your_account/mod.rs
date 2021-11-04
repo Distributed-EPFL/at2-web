@@ -10,8 +10,8 @@ use yew::{prelude::*, worker::Agent};
 
 use crate::agents;
 
-mod send_transaction_builder;
-use send_transaction_builder::{SendTransactionBuilder, DEFAULT_SEND_TRANSACTION_AMOUNT};
+mod transaction_builder;
+use transaction_builder::TransactionBuilder;
 
 #[derive(Properties, Clone)]
 pub struct Properties {
@@ -32,7 +32,7 @@ pub struct YourAccount {
     current_user_balance: Option<u64>,
 
     send_transaction_dialog: WeakComponentLink<MatDialog>,
-    send_transaction_builder: SendTransactionBuilder,
+    transaction_builder: TransactionBuilder,
 }
 
 pub enum Message {
@@ -60,7 +60,7 @@ impl Component for YourAccount {
             users: HashMap::new(),
             current_user_balance: None,
             send_transaction_dialog: Default::default(),
-            send_transaction_builder: Default::default(),
+            transaction_builder: Default::default(),
         }
     }
 
@@ -76,18 +76,18 @@ impl Component for YourAccount {
             Self::Message::ClickUser(ref username) => {
                 let user = self.users.get(username).unwrap().to_owned();
                 self.get_balance_agent.send(user.clone());
-                self.send_transaction_builder.set_user(user);
+                self.transaction_builder.user = Some(user);
                 self.send_transaction_dialog.show();
                 false
             }
             Self::Message::UpdateAmountToSend(amount) => {
-                self.send_transaction_builder.set_amount(amount);
+                self.transaction_builder.amount = amount;
                 false
             }
             Self::Message::SendTransaction => {
                 self.current_user_balance = None;
 
-                let builder = mem::take(&mut self.send_transaction_builder);
+                let builder = mem::take(&mut self.transaction_builder);
                 let user = self.props.user.clone();
                 let (recipient, amount) = builder.build().unwrap();
                 let sequence = 1; // TODO retrieve latest sequence
@@ -100,7 +100,7 @@ impl Component for YourAccount {
             Self::Message::CancelSendTransaction => {
                 self.current_user_balance = None;
 
-                self.send_transaction_builder = SendTransactionBuilder::default();
+                self.transaction_builder = TransactionBuilder::default();
                 false
             }
             Self::Message::AssetSent(ret) => {
@@ -212,7 +212,7 @@ impl Component for YourAccount {
                                     label="Amount to send"
                                     align_end=true
                                 ><input
-                                    value=DEFAULT_SEND_TRANSACTION_AMOUNT.to_string()
+                                    value=self.transaction_builder.amount.to_string()
                                     oninput=self.link.callback(|event: InputData|
                                         Self::Message::UpdateAmountToSend(event.value.parse().unwrap())
                                     )
