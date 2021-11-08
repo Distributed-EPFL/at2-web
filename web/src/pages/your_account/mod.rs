@@ -1,9 +1,9 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, convert::TryInto};
 
 use at2_ns::{FullUser, ThinUser};
 use js_sys::{JsString, Reflect};
 use material_yew::{MatButton, MatDialog, WeakComponentLink};
-use yew::{prelude::*, worker::Agent};
+use yew::{prelude::*, services::ConsoleService, worker::Agent};
 
 use crate::agents;
 
@@ -60,7 +60,10 @@ impl Component for YourAccount {
     fn update(&mut self, message: Self::Message) -> ShouldRender {
         match message {
             Self::Message::GotUsers(users) => {
-                self.users = users.into_iter().map(|user| (user.name.clone(), user)).collect();
+                self.users = users
+                    .into_iter()
+                    .map(|user| (user.name.clone(), user))
+                    .collect();
                 true
             }
             Self::Message::ClickUser(ref username) => {
@@ -71,16 +74,20 @@ impl Component for YourAccount {
                 false
             }
             Self::Message::SendTransaction((recipient, amount)) => {
-                let sequence = self.props.user.1 + 1;
+                if let Ok(amount) = amount.try_into() {
+                    let sequence = self.props.user.1 + 1;
 
-                self.send_asset_agent.send((
-                    self.props.user.0.clone(),
-                    sequence,
-                    recipient,
-                    amount as u64,
-                ));
+                    self.send_asset_agent.send((
+                        self.props.user.0.clone(),
+                        sequence,
+                        recipient,
+                        amount,
+                    ));
 
-                self.props.bump_sequence.emit(sequence);
+                    self.props.bump_sequence.emit(sequence);
+                } else {
+                    ConsoleService::error(&format!("unable to fit {} in u64", amount));
+                }
 
                 false
             }
