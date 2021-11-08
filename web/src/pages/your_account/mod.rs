@@ -9,7 +9,6 @@ use crate::agents;
 
 mod send_transaction_dialog;
 use send_transaction_dialog::SendTransactionDialog;
-mod transaction_builder;
 
 #[derive(Properties, Clone)]
 pub struct Properties {
