@@ -59,10 +59,7 @@ impl Component for YourAccount {
     fn update(&mut self, message: Self::Message) -> ShouldRender {
         match message {
             Self::Message::GotUsers(users) => {
-                self.users = users
-                    .into_iter()
-                    .map(|user| (user.name().to_owned(), user))
-                    .collect();
+                self.users = users.into_iter().map(|user| (user.name.clone(), user)).collect();
                 true
             }
             Self::Message::ClickUser(ref username) => {
@@ -99,7 +96,7 @@ impl Component for YourAccount {
 
     fn view(&self) -> Html {
         let mut users = self.users.values().cloned().collect::<Vec<_>>();
-        users.sort_by(|l, r| l.name().cmp(r.name()));
+        users.sort_by(|l, r| l.name.cmp(&r.name));
 
         struct Transaction<'a> {
             started: &'a str,
@@ -165,7 +162,7 @@ impl Component for YourAccount {
                             )
                         )
                     ><MatButton
-                        label=user.name().to_owned()
+                        label=user.name
                         raised=true
                     /></span>
                 } ) }
