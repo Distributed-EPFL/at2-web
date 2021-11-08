@@ -12,7 +12,9 @@ use send_transaction_dialog::SendTransactionDialog;
 
 #[derive(Properties, Clone)]
 pub struct Properties {
+    /// User's account
     pub user: (FullUser, sieve::Sequence),
+    /// Where to send the new sequence when the current one is used
     pub bump_sequence: Callback<sieve::Sequence>,
 }
 

@@ -13,9 +13,15 @@ use crate::agents;
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct Properties {
+    /// User to show
+    ///
+    /// It's an Option to workaround a material-yew bug, so that the MatDialog can still be created
+    /// even without any content
     pub user: Option<ThinUser>,
+    /// Link to the MatDialog
     pub dialog_link: WeakComponentLink<MatDialog>,
 
+    /// Where to send the transaction
     pub on_send: Callback<(ThinUser, usize)>,
 }
 

@@ -26,6 +26,7 @@ pub enum Message {
 
 const PAGE_COUNT: usize = 5;
 
+/// Component showing the pages
 pub struct Pages {
     link: ComponentLink<Self>,
     index: usize,
