@@ -10,8 +10,11 @@ use crate::config::Config;
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct Properties {
+    /// User to create
     pub user: FullUser,
+    /// Was the user already created
     pub user_created: bool,
+    /// Where to send to created user with a potentially different name that the one given
     pub on_new_user: Callback<Box<FullUser>>,
 }
 

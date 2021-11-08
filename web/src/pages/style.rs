@@ -1,5 +1,6 @@
 use yew::prelude::*;
 
+/// Shared CSS declarations
 pub struct Style;
 
 impl Component for Style {
