@@ -7,7 +7,8 @@ use material_yew::{
 };
 use yew::{prelude::*, worker::Agent};
 
-use super::transaction_builder::TransactionBuilder;
+const DEFAULT_SEND_TRANSACTION_AMOUNT: usize = 3;
+
 use crate::agents;
 
 #[derive(Properties, Clone, PartialEq)]
@@ -27,7 +28,7 @@ pub struct SendTransactionDialog {
     get_balance_agent: Box<dyn Bridge<agents::GetBalance>>,
     current_user_balance: Option<u64>,
 
-    transaction_builder: TransactionBuilder,
+    amount_to_send: usize,
 }
 
 pub enum Message {
@@ -48,7 +49,7 @@ impl Component for SendTransactionDialog {
             props,
             get_balance_agent: agents::GetBalance::bridge(link.callback(Self::Message::GotBalance)),
             current_user_balance: None,
-            transaction_builder: Default::default(),
+            amount_to_send: DEFAULT_SEND_TRANSACTION_AMOUNT,
         }
     }
 
@@ -56,16 +57,17 @@ impl Component for SendTransactionDialog {
         match message {
             Self::Message::UpdateAmountToSend(parsed_amount) => {
                 if let Some(amount) = parsed_amount {
-                    self.transaction_builder.amount = amount;
+                    self.amount_to_send = amount;
                 }
                 false
             }
             Self::Message::SendTransaction => {
-                let builder = mem::take(&mut self.transaction_builder);
-
-                let (recipient, amount) = builder.build().unwrap();
-
-                self.props.on_send.emit((recipient, amount));
+                if let Some(recipient) = self.props.user.clone() {
+                    self.props.on_send.emit((
+                        recipient,
+                        mem::replace(&mut self.amount_to_send, DEFAULT_SEND_TRANSACTION_AMOUNT),
+                    ));
+                }
                 false
             }
             Self::Message::CancelDialog => false,
@@ -91,7 +93,6 @@ impl Component for SendTransactionDialog {
 
         self.props = props;
 
-        self.transaction_builder.user = self.props.user.clone();
         if let Some(user) = self.props.user.clone() {
             self.get_balance_agent.send(user);
         }
@@ -132,7 +133,7 @@ impl Component for SendTransactionDialog {
                             label="Amount to send"
                             align_end=true
                         ><input
-                            value=self.transaction_builder.amount.to_string()
+                            value=self.amount_to_send.to_string()
                             min=1
                             oninput=self.link.callback(|event: InputData|
                                 Self::Message::UpdateAmountToSend(event.value.parse().ok())
