@@ -13,7 +13,8 @@ mod transaction_builder;
 
 #[derive(Properties, Clone)]
 pub struct Properties {
-    pub user: FullUser,
+    pub user: (FullUser, sieve::Sequence),
+    pub bump_sequence: Callback<sieve::Sequence>,
 }
 
 pub struct YourAccount {
@@ -72,14 +73,16 @@ impl Component for YourAccount {
                 false
             }
             Self::Message::SendTransaction((recipient, amount)) => {
-                let sequence = 1; // TODO retrieve latest sequence
+                let sequence = self.props.user.1 + 1;
 
                 self.send_asset_agent.send((
-                    self.props.user.clone(),
+                    self.props.user.0.clone(),
                     sequence,
                     recipient,
                     amount as u64,
                 ));
+
+                self.props.bump_sequence.emit(sequence);
 
                 false
             }

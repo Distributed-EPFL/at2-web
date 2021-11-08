@@ -21,6 +21,7 @@ pub enum Message {
     NextPage,
 
     UserCreated(Box<FullUser>),
+    SequenceBumped(sieve::Sequence),
 }
 
 const PAGE_COUNT: usize = 5;
@@ -29,7 +30,7 @@ pub struct Pages {
     link: ComponentLink<Self>,
     index: usize,
 
-    user: FullUser,
+    user: (FullUser, sieve::Sequence),
     user_created: bool,
 }
 
@@ -42,7 +43,7 @@ impl Component for Pages {
             link,
             index: 0,
 
-            user: FullUser::new("".to_owned(), sign::KeyPair::random()),
+            user: (FullUser::new("".to_owned(), sign::KeyPair::random()), 0),
             user_created: false,
         }
     }
@@ -58,9 +59,13 @@ impl Component for Pages {
                 true
             }
             Self::Message::UserCreated(user) => {
-                self.user = *user;
+                self.user.0 = *user;
                 self.user_created = true;
                 true
+            }
+            Self::Message::SequenceBumped(seq) => {
+                self.user.1 = seq;
+                false
             }
         }
     }
@@ -120,11 +125,12 @@ impl Component for Pages {
                     0 => html! { <Welcome/> },
                     1 => html! { <NewAccount
                         on_new_user=self.link.callback(Self::Message::UserCreated)
-                        user=self.user.clone()
+                        user=self.user.0.clone()
                         user_created=self.user_created
                     /> },
                     2 => html! { <YourAccount
                         user=self.user.clone()
+                        bump_sequence=self.link.callback(Self::Message::SequenceBumped)
                     /> },
                     3 => html! { <Speedtest/> },
                     4 => html! { <Summary/> },
