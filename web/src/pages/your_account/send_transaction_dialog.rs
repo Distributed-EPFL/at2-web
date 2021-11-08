@@ -102,7 +102,7 @@ impl Component for SendTransactionDialog {
     fn view(&self) -> Html {
         html! {
             <MatDialog
-                heading=self.props.user.as_ref().map(|user| Cow::from(user.name().to_owned()))
+                heading=self.props.user.as_ref().map(|user| Cow::from(user.name.clone()))
                 dialog_link=self.props.dialog_link.clone()
                 onclosed=self.link.callback(|action: String| match action.as_str() {
                     "send" => Self::Message::SendTransaction,

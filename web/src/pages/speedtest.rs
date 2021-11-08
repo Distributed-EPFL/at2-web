@@ -106,7 +106,7 @@ impl Component for Speedtest {
                     >
                         <option>{ "Anyone" }</option>
                         { for self.users.iter().map(|user| html! {
-                            <option>{ user.name() }</option>
+                            <option>{ user.name.clone() }</option>
                         }) }
                     </select>
                  </label>
