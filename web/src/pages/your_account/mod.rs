@@ -37,7 +37,7 @@ pub enum Message {
     GotUsers(<agents::GetUsers as Agent>::Output),
     AssetSent(<agents::SendAsset as Agent>::Output),
 
-    ClickUser(String),
+    ClickUser(Option<String>),
     SendTransaction((ThinUser, usize)),
 }
 
@@ -66,11 +66,14 @@ impl Component for YourAccount {
                     .collect();
                 true
             }
-            Self::Message::ClickUser(ref username) => {
-                let user = self.users.get(username).unwrap().to_owned();
-
-                self.dialog_user = Some(user);
-                self.dialog_link.show();
+            Self::Message::ClickUser(found_username) => {
+                if let Some(user) = found_username
+                    .as_ref()
+                    .and_then(|username| self.users.get(username))
+                {
+                    self.dialog_user = Some(user.to_owned());
+                    self.dialog_link.show();
+                }
                 false
             }
             Self::Message::SendTransaction((recipient, amount)) => {
@@ -92,7 +95,7 @@ impl Component for YourAccount {
                 false
             }
             Self::Message::AssetSent(ret) => {
-                ret.unwrap(); // TODO unwrap
+                ret.unwrap(); // TODO send asset in dialog
                 false
             }
         }
@@ -159,15 +162,14 @@ impl Component for YourAccount {
                 { for users.into_iter().map(|user| html! {
                     <span
                         onclick=self.link.callback(|event: MouseEvent|
-                            Self::Message::ClickUser(
+                            Self::Message::ClickUser((|| {
                                 Reflect::get(
-                                    event.target().unwrap().as_ref(),
+                                    event.target()?.as_ref(),
                                     &JsString::from("label"),
                                 )
-                                .unwrap()
+                                .ok()?
                                 .as_string()
-                                .unwrap()
-                            )
+                            })())
                         )
                     ><MatButton
                         label=user.name
