@@ -137,9 +137,9 @@ impl Component for Speedtest {
                 )>
                     { "AT2's TPS: 170" }
                     <br />
-                    { "Bitcoin's TPS: 5" } // TODO check values
+                    { "Bitcoin's TPS: 7" }
                     <br />
-                    { "Ethereum's TPS: 16" }
+                    { "Ethereum's TPS: 25" }
                 </div>
             </div>
 
