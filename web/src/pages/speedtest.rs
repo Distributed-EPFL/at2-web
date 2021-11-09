@@ -19,7 +19,7 @@ pub struct Speedtest {
 
 pub enum Message {
     GotUsers(<agents::GetUsers as Agent>::Output),
-    UpdateTransactionAmount(usize),
+    UpdateTransactionAmount(Option<usize>),
     UpdateUser(String),
     Start,
 }
@@ -47,14 +47,14 @@ impl Component for Speedtest {
                 self.users = users;
                 true
             }
-
             Self::Message::Start => {
                 self.is_running = true;
                 true
             }
-
             Self::Message::UpdateTransactionAmount(amount) => {
-                self.amount = amount;
+                if let Some(amount) = amount {
+                    self.amount = amount;
+                }
                 false
             }
             Self::Message::UpdateUser(username) => {
@@ -89,7 +89,7 @@ impl Component for Speedtest {
                 <label> { "How many transactions to send" }
                     <input
                         oninput=self.link.callback(|event: InputData|
-                            Self::Message::UpdateTransactionAmount(event.value.parse().unwrap())) // TODO unwrap
+                            Self::Message::UpdateTransactionAmount(event.value.parse().ok()))
                         value=100
                         min=1
                         type={ "number" }
