@@ -11,11 +11,11 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn parse() -> Result<Self, http::uri::InvalidUri> {
-        Ok(Self {
-            name_service: NAME_SERVICE_URI.parse()?,
-            network: NETWORK_URI.parse()?,
-        })
+    pub fn parse() -> Self {
+        Self {
+            name_service: NAME_SERVICE_URI.parse().unwrap(),
+            network: NETWORK_URI.parse().unwrap(),
+        }
     }
 
     pub fn name_service(&self) -> &Uri {

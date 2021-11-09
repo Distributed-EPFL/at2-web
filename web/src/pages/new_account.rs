@@ -38,7 +38,7 @@ impl Component for NewAccount {
     type Message = Message;
 
     fn create(properties: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let conf = Config::parse().unwrap(); // TODO unwrap
+        let conf = Config::parse();
 
         Self {
             link,

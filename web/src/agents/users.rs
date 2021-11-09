@@ -25,7 +25,7 @@ impl Agent for GetUsers {
     type Output = HashSet<ThinUser>;
 
     fn create(link: AgentLink<Self>) -> Self {
-        let conf = Config::parse().unwrap(); // TODO unwrap
+        let conf = Config::parse();
         let client = Client::new(conf.name_service());
         let update_users = link.callback(|users| users);
 

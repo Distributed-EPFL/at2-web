@@ -18,7 +18,7 @@ impl Agent for GetBalance {
     type Output = Result<u64, client::Error>;
 
     fn create(link: AgentLink<Self>) -> Self {
-        let conf = Config::parse().unwrap(); // TODO unwrap
+        let conf = Config::parse();
 
         Self {
             link,
