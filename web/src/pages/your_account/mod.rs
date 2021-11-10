@@ -109,7 +109,7 @@ impl Component for YourAccount {
                     self.dialog_user = Some(user.to_owned());
                     self.dialog_link.show();
                 }
-                false
+                true
             }
             Self::Message::SendTransaction((recipient, amount)) => {
                 if let Ok(amount) = amount.try_into() {
