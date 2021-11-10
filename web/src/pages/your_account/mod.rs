@@ -1,6 +1,10 @@
 use std::{collections::HashMap, convert::TryInto};
 
+use at2_node::FullTransaction;
 use at2_ns::{FullUser, ThinUser};
+use chrono::Utc;
+use chrono_humanize::HumanTime;
+use drop::crypto::sign;
 use js_sys::{JsString, Reflect};
 use material_yew::{MatButton, MatDialog, WeakComponentLink};
 use yew::{prelude::*, services::ConsoleService, worker::Agent};
@@ -26,16 +30,23 @@ pub struct YourAccount {
     #[allow(dead_code)] // never dropped
     get_users_agent: Box<dyn Bridge<agents::GetUsers>>,
     send_asset_agent: Box<dyn Bridge<agents::SendAsset>>,
+    #[allow(dead_code)] // never dropped
+    get_latest_transactions_agent: Box<dyn Bridge<agents::GetLatestTransactions>>,
 
-    users: HashMap<String, ThinUser>,
+    sorted_usernames: Vec<String>,
+    username_to_user: HashMap<String, ThinUser>,
+    pubkey_to_username: HashMap<sign::PublicKey, String>,
 
     dialog_link: WeakComponentLink<MatDialog>,
     dialog_user: Option<ThinUser>,
+
+    latest_transactions: Vec<FullTransaction>,
 }
 
 pub enum Message {
     GotUsers(<agents::GetUsers as Agent>::Output),
     AssetSent(<agents::SendAsset as Agent>::Output),
+    LatestTransactionsGot(<agents::GetLatestTransactions as Agent>::Output),
 
     ClickUser(Option<String>),
     SendTransaction((ThinUser, usize)),
@@ -49,27 +60,51 @@ impl Component for YourAccount {
         Self {
             link: link.clone(),
             props,
+
             get_users_agent: agents::GetUsers::bridge(link.callback(Self::Message::GotUsers)),
             send_asset_agent: agents::SendAsset::bridge(link.callback(Self::Message::AssetSent)),
-            users: HashMap::new(),
+            get_latest_transactions_agent: agents::GetLatestTransactions::bridge(
+                link.callback(Self::Message::LatestTransactionsGot),
+            ),
+
+            sorted_usernames: Vec::new(),
+            username_to_user: HashMap::new(),
+            pubkey_to_username: HashMap::new(),
+
             dialog_link: Default::default(),
             dialog_user: None,
+
+            latest_transactions: Vec::new(),
         }
     }
 
     fn update(&mut self, message: Self::Message) -> ShouldRender {
         match message {
             Self::Message::GotUsers(users) => {
-                self.users = users
-                    .into_iter()
+                let mut sorted_usernames = users
+                    .iter()
+                    .map(|user| user.name.clone())
+                    .collect::<Vec<_>>();
+                sorted_usernames.sort_unstable();
+                self.sorted_usernames = sorted_usernames;
+
+                self.username_to_user = users
+                    .iter()
+                    .cloned()
                     .map(|user| (user.name.clone(), user))
                     .collect();
+
+                self.pubkey_to_username = users
+                    .into_iter()
+                    .map(|user| (*user.public_key(), user.name.clone()))
+                    .collect();
+
                 true
             }
             Self::Message::ClickUser(found_username) => {
                 if let Some(user) = found_username
                     .as_ref()
-                    .and_then(|username| self.users.get(username))
+                    .and_then(|username| self.username_to_user.get(username))
                 {
                     self.dialog_user = Some(user.to_owned());
                     self.dialog_link.show();
@@ -98,6 +133,10 @@ impl Component for YourAccount {
                 ret.unwrap(); // TODO send asset in dialog
                 false
             }
+            Self::Message::LatestTransactionsGot(latest_transactions) => {
+                self.latest_transactions = latest_transactions;
+                true
+            }
         }
     }
 
@@ -106,40 +145,7 @@ impl Component for YourAccount {
     }
 
     fn view(&self) -> Html {
-        let mut users = self.users.values().cloned().collect::<Vec<_>>();
-        users.sort_by(|l, r| l.name.cmp(&r.name));
-
-        struct Transaction<'a> {
-            started: &'a str,
-            from: &'a str,
-            to: &'a str,
-            state: &'a str,
-            amount: usize,
-        }
-
-        let transactions = vec![
-            Transaction {
-                started: "3s ago",
-                from: "Marie",
-                to: "Brigitte",
-                state: "Received, waiting for confirmation",
-                amount: 20,
-            },
-            Transaction {
-                started: "20min ago",
-                from: "tharvik",
-                to: "Alice",
-                state: "Confirmed",
-                amount: 6,
-            },
-            Transaction {
-                started: "3 days ago",
-                from: "Alice",
-                to: "Marie",
-                state: "Confirmed",
-                amount: 565,
-            },
-        ];
+        let now = Utc::now();
 
         html! { <>
             <h1> { "Your account" } </h1>
@@ -159,7 +165,7 @@ impl Component for YourAccount {
             <h2> { "Addressbook" } </h2>
 
             <span class=classes!("boxes")>
-                { for users.into_iter().map(|user| html! {
+                { for self.sorted_usernames.iter().cloned().map(|username| html! {
                     <span
                         onclick=self.link.callback(|event: MouseEvent|
                             Self::Message::ClickUser((|| {
@@ -172,7 +178,7 @@ impl Component for YourAccount {
                             })())
                         )
                     ><MatButton
-                        label=user.name
+                        label=username
                         raised=true
                     /></span>
                 } ) }
@@ -192,14 +198,16 @@ impl Component for YourAccount {
                 "width: 100%;",
                 "border-collapse: collapse;",
             )>
-                { for transactions.iter().map(|tx| html! {
+                { for self.latest_transactions.iter().map(|tx| html! {
                   <tr style=concat!(
                       "border-bottom: 1px solid;",
                       "border-top: 1px solid;",
                   )>
-                      <td>{ tx.started }</td>
-                      <td>{ tx.from } { " -> " } { tx.to }</td>
-                      <td>{ tx.state }</td>
+                      <td>{ HumanTime::from(tx.timestamp - now) }</td>
+                      <td>
+                        { self.pubkey_to_username.get(&tx.sender).unwrap_or(&tx.sender.to_string()) }
+                        { " -> " }
+                        { self.pubkey_to_username.get(&tx.recipient).unwrap_or(&tx.recipient.to_string()) }</td>
                       <td>{ tx.amount } { "¤" }</td>
                   </tr>
                 }) }
