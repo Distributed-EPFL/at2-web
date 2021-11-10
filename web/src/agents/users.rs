@@ -16,6 +16,7 @@ pub struct GetUsers {
     last_send: HashSet<ThinUser>,
 
     subscribers: HashSet<HandlerId>,
+    subscribers_changed_since_last_sent: bool,
 }
 
 impl Agent for GetUsers {
@@ -45,14 +46,20 @@ impl Agent for GetUsers {
             }),
             last_send: HashSet::new(),
             subscribers: HashSet::new(),
+            subscribers_changed_since_last_sent: false,
         }
     }
 
     fn update(&mut self, users: Self::Message) {
-        if users.symmetric_difference(&self.last_send).next() != None {
+        if users.symmetric_difference(&self.last_send).next() != None
+            || self.subscribers_changed_since_last_sent
+        {
             self.subscribers
                 .iter()
-                .for_each(|id| self.link.respond(*id, users.clone()))
+                .for_each(|id| self.link.respond(*id, users.clone()));
+
+            self.last_send = users;
+            self.subscribers_changed_since_last_sent = false;
         }
     }
 
@@ -62,9 +69,11 @@ impl Agent for GetUsers {
 
     fn connected(&mut self, id: HandlerId) {
         self.subscribers.insert(id);
+        self.subscribers_changed_since_last_sent = true;
     }
 
     fn disconnected(&mut self, id: HandlerId) {
         self.subscribers.remove(&id);
+        self.subscribers_changed_since_last_sent = true;
     }
 }
