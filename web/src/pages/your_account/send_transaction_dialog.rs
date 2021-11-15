@@ -68,15 +68,18 @@ impl Component for SendTransactionDialog {
                 false
             }
             Self::Message::SendTransaction => {
-                if let Some(recipient) = self.props.user.clone() {
+                if let Some(recipient) = mem::take(&mut self.props.user) {
                     self.props.on_send.emit((
                         recipient,
                         mem::replace(&mut self.amount_to_send, DEFAULT_SEND_TRANSACTION_AMOUNT),
                     ));
                 }
-                false
+                true
             }
-            Self::Message::CancelDialog => false,
+            Self::Message::CancelDialog => {
+                self.props.user = None;
+                true
+            }
             Self::Message::GotBalance(ret) => match ret {
                 Ok(balance) => {
                     self.current_user_balance = Some(balance);
