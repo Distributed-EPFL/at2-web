@@ -66,7 +66,7 @@ impl Component for Pages {
             }
             Self::Message::SequenceBumped(seq) => {
                 self.user.1 = seq;
-                false
+                true
             }
         }
     }

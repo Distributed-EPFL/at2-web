@@ -45,7 +45,7 @@ pub struct YourAccount {
 
 pub enum Message {
     GotUsers(<agents::GetUsers as Agent>::Output),
-    AssetSent(<agents::SendAsset as Agent>::Output),
+    TransactionSent(<agents::SendAsset as Agent>::Output),
     LatestTransactionsGot(<agents::GetLatestTransactions as Agent>::Output),
 
     ClickUser(Option<String>),
@@ -62,7 +62,9 @@ impl Component for YourAccount {
             props,
 
             get_users_agent: agents::GetUsers::bridge(link.callback(Self::Message::GotUsers)),
-            send_asset_agent: agents::SendAsset::bridge(link.callback(Self::Message::AssetSent)),
+            send_asset_agent: agents::SendAsset::bridge(
+                link.callback(Self::Message::TransactionSent),
+            ),
             get_latest_transactions_agent: agents::GetLatestTransactions::bridge(
                 link.callback(Self::Message::LatestTransactionsGot),
             ),
@@ -129,7 +131,7 @@ impl Component for YourAccount {
 
                 false
             }
-            Self::Message::AssetSent(ret) => {
+            Self::Message::TransactionSent(ret) => {
                 ret.unwrap(); // TODO send asset in dialog
                 false
             }
@@ -140,7 +142,8 @@ impl Component for YourAccount {
         }
     }
 
-    fn change(&mut self, _: Self::Properties) -> ShouldRender {
+    fn change(&mut self, props: Self::Properties) -> ShouldRender {
+        self.props = props;
         false
     }
 
