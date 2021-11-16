@@ -1,6 +1,6 @@
 use std::{collections::HashMap, convert::TryInto};
 
-use at2_node::FullTransaction;
+use at2_node::{FullTransaction, TransactionState};
 use at2_ns::{FullUser, ThinUser};
 use chrono::Utc;
 use chrono_humanize::HumanTime;
@@ -207,6 +207,11 @@ impl Component for YourAccount {
                       "border-top: 1px solid;",
                   )>
                       <td>{ HumanTime::from(tx.timestamp - now) }</td>
+                      <td>{ match tx.state {
+                          TransactionState::Pending => html! { <span style="color: grey">{ "pending" }</span> },
+                          TransactionState::Success => html! { "success" },
+                          TransactionState::Failure => html! { <span style="color: violet">{ "failure" }</span> },
+                      }}</td>
                       <td>
                         { self.pubkey_to_username.get(&tx.sender).unwrap_or(&tx.sender.to_string()) }
                         { " -> " }
