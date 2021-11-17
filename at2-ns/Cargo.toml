@@ -6,8 +6,8 @@ edition = "2018"
 license = "AGPL-3.0-only"
 
 [dependencies]
-prost = { version = "0.8", default-features = false }
-tonic = { version = "0.5", default-features = false, features = ["codegen", "prost"] }
+prost = { version = "0.9", default-features = false }
+tonic = { version = "0.6", default-features = false, features = ["codegen", "prost"] }
 
 # bins
 bincode = { version = "1", optional = true }
@@ -22,12 +22,12 @@ snafu = { version = "0.6", optional = true }
 # server
 structopt = { version = "0.3", optional = true }
 tokio = { version = "1", optional = true, features = ["rt-multi-thread"] }
-tonic-web = { version = "0.1", optional = true }
+tonic-web = { version = "0.2", optional = true }
 tracing = { version = "0.1", optional = true }
 tracing-fmt = { version = "0.1", optional = true }
 
 [build-dependencies]
-tonic-build = { version = "0.5", default-features = false, features = ["prost"] }
+tonic-build = { version = "0.6", default-features = false, features = ["prost"] }
 
 [features]
 default = ["client"]

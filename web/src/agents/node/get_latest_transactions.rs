@@ -27,7 +27,7 @@ impl Agent for GetLatestTransactions {
 
     fn create(link: AgentLink<Self>) -> Self {
         let conf = Config::parse();
-        let client = Client::new(conf.network().to_owned()).unwrap(); // can only fail on !wasm
+        let client = Client::new(conf.network().to_owned());
         let update_txs = link.callback(|users| users);
 
         Self {
