@@ -22,7 +22,7 @@ impl Agent for SendAsset {
 
         Self {
             link,
-            client: Client::new(conf.network().to_owned()).unwrap(), // can only fail on !wasm
+            client: Client::new(conf.network().to_owned()),
         }
     }
 
