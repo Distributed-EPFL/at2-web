@@ -57,18 +57,20 @@ impl Component for YourAccount {
     type Message = Message;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+        let get_users_agent = agents::GetUsers::bridge(link.callback(Self::Message::GotUsers));
+        let send_asset_agent =
+            agents::SendAsset::bridge(link.callback(Self::Message::TransactionSent));
+        let get_latest_transactions_agent = agents::GetLatestTransactions::bridge(
+            link.callback(Self::Message::LatestTransactionsGot),
+        );
+
         Self {
-            link: link.clone(),
+            link,
             props,
 
-            get_users_agent: agents::GetUsers::bridge(link.callback(Self::Message::GotUsers)),
-            send_asset_agent: agents::SendAsset::bridge(
-                link.callback(Self::Message::TransactionSent),
-            ),
-            get_latest_transactions_agent: agents::GetLatestTransactions::bridge(
-                link.callback(Self::Message::LatestTransactionsGot),
-            ),
-
+            get_users_agent,
+            send_asset_agent,
+            get_latest_transactions_agent,
             sorted_usernames: Vec::new(),
             username_to_user: HashMap::new(),
             pubkey_to_username: HashMap::new(),
