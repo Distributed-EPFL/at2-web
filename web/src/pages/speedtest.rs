@@ -1,56 +1,157 @@
-use std::collections::HashSet;
+use std::collections::HashMap;
 
-use at2_ns::ThinUser;
-use yew::{prelude::*, worker::Agent};
+use at2_ns::{FullUser, ThinUser};
+use chrono::{offset::Local, DateTime, Duration};
+use gloo_timers::callback::{Interval, Timeout};
+use rand::{seq::SliceRandom, thread_rng};
+use yew::{prelude::*, services::ConsoleService, worker::Agent};
 
 use crate::agents;
 
+#[derive(Properties, Clone)]
+pub struct Properties {
+    /// User's account
+    pub user: (FullUser, sieve::Sequence),
+    /// Where to send the new sequence when the current one is used
+    pub bump_sequence: Callback<sieve::Sequence>,
+}
+
 pub struct Speedtest {
     link: ComponentLink<Self>,
+    props: Properties,
 
     #[allow(dead_code)] // never dropped
     users_agent: Box<dyn Bridge<agents::GetUsers>>,
-    users: HashSet<ThinUser>,
+    send_asset_agent: Box<dyn Bridge<agents::SendAsset>>,
 
-    is_running: bool,
+    sorted_usernames: Vec<String>,
+    username_to_user: HashMap<String, ThinUser>,
+
     amount: usize,
-    to_user: Option<String>,
+    to_username: Option<String>,
+
+    state: State,
+    #[allow(dead_code)] // never dropped
+    last_sequence_refresher: Interval,
+}
+
+pub enum State {
+    Idle,
+    Started {
+        started_at: DateTime<Local>,
+
+        sent_tx: usize,
+        confirmed_tx: usize,
+        total_tx: usize,
+    },
+    Done {
+        elapsed: Duration,
+        total_tx: usize,
+    },
 }
 
 pub enum Message {
+    TransactionSent(<agents::SendAsset as Agent>::Output),
     GotUsers(<agents::GetUsers as Agent>::Output),
+    GotLastSequence(<agents::GetLastSequence as Agent>::Output),
+
     UpdateTransactionAmount(Option<usize>),
     UpdateUser(String),
+
     Start,
+    Running {
+        users_to_send_to: Vec<ThinUser>,
+        remaining: usize,
+    },
 }
 
 impl Component for Speedtest {
-    type Properties = ();
+    type Properties = Properties;
     type Message = Message;
 
-    fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let users_agent = agents::GetUsers::bridge(link.callback(Self::Message::GotUsers));
+        let send_asset_agent =
+            agents::SendAsset::bridge(link.callback(Self::Message::TransactionSent));
+
+        let user = props.user.0.clone().to_thin();
+        let mut get_last_sequence_agent =
+            agents::GetLastSequence::bridge(link.callback(Self::Message::GotLastSequence));
 
         Self {
             link,
+            props,
+
             users_agent,
-            users: HashSet::new(),
-            is_running: false,
-            amount: 0,
-            to_user: None,
+            send_asset_agent,
+
+            sorted_usernames: Vec::new(),
+            username_to_user: HashMap::new(),
+
+            amount: 100,
+            to_username: None,
+
+            state: State::Idle,
+            last_sequence_refresher: Interval::new(100, move || {
+                get_last_sequence_agent.send(user.clone())
+            }),
         }
     }
 
     fn update(&mut self, message: Self::Message) -> ShouldRender {
         match message {
+            Self::Message::TransactionSent(_) => {
+                if let State::Started { sent_tx, .. } = &mut self.state {
+                    *sent_tx += 1;
+                }
+
+                true
+            }
+
             Self::Message::GotUsers(users) => {
-                self.users = users;
+                let mut sorted_usernames = users
+                    .iter()
+                    .map(|user| user.name.clone())
+                    .collect::<Vec<_>>();
+                sorted_usernames.sort_unstable();
+                self.sorted_usernames = sorted_usernames;
+
+                self.username_to_user = users
+                    .iter()
+                    .cloned()
+                    .map(|user| (user.name.clone(), user))
+                    .collect();
+
                 true
             }
-            Self::Message::Start => {
-                self.is_running = true;
+            Self::Message::GotLastSequence(ret) => {
+                if let State::Started {
+                    started_at,
+                    confirmed_tx,
+                    total_tx,
+                    ..
+                } = &mut self.state
+                {
+                    if let Ok(seq) = ret {
+                        ConsoleService::info(&format!(
+                            "got last sequence: confirmed_tx={} seq={} base_seq={}",
+                            confirmed_tx, seq, self.props.user.1
+                        ));
+                        *confirmed_tx = (seq - self.props.user.1) as usize;
+
+                        if confirmed_tx == total_tx {
+                            self.state = State::Done {
+                                elapsed: Local::now() - *started_at,
+                                total_tx: *total_tx,
+                            };
+
+                            self.props.bump_sequence.emit(seq);
+                        }
+                    }
+                }
                 true
             }
+
             Self::Message::UpdateTransactionAmount(amount) => {
                 if let Some(amount) = amount {
                     self.amount = amount;
@@ -58,13 +159,67 @@ impl Component for Speedtest {
                 false
             }
             Self::Message::UpdateUser(username) => {
-                self.to_user = Some(username);
+                self.to_username = Some(username);
                 false
+            }
+
+            Self::Message::Start => {
+                let total_tx = self.amount;
+
+                self.state = State::Started {
+                    started_at: Local::now(),
+                    sent_tx: 0,
+                    confirmed_tx: 0,
+                    total_tx,
+                };
+
+                let users_to_send_to = self
+                    .to_username
+                    .as_ref()
+                    .and_then(|username| self.username_to_user.get(username))
+                    .map(|user| vec![user.clone()])
+                    .unwrap_or_else(|| self.username_to_user.values().cloned().collect());
+
+                self.link.send_message(Self::Message::Running {
+                    users_to_send_to,
+                    remaining: total_tx,
+                });
+
+                true
+            }
+            Self::Message::Running {
+                users_to_send_to,
+                remaining,
+            } => {
+                if let State::Started { total_tx, .. } = self.state {
+                    let sender = self.props.user.0.clone();
+                    let recipient = users_to_send_to.choose(&mut thread_rng()).unwrap(); // can't be empty
+                    let sequence = self.props.user.1 + (total_tx - remaining) as u32 + 1;
+
+                    // TODO consider sending many call
+                    self.send_asset_agent
+                        .send((sender, sequence, recipient.clone(), 1));
+
+                    let callback = self.link.callback(|m| m);
+                    if remaining > 1 {
+                        // trigger refresh
+                        Timeout::new(0, move || {
+                            callback.emit(Self::Message::Running {
+                                users_to_send_to,
+                                remaining: remaining - 1,
+                            })
+                        })
+                        .forget();
+                    }
+                }
+
+                true
             }
         }
     }
 
-    fn change(&mut self, _: Self::Properties) -> ShouldRender {
+    fn change(&mut self, props: Self::Properties) -> ShouldRender {
+        self.props = props;
         false
     }
 
@@ -90,7 +245,7 @@ impl Component for Speedtest {
                     <input
                         oninput=self.link.callback(|event: InputData|
                             Self::Message::UpdateTransactionAmount(event.value.parse().ok()))
-                        value=100
+                        value=self.amount.to_string()
                         min=1
                         type={ "number" }
                     />
@@ -105,44 +260,57 @@ impl Component for Speedtest {
                         })
                     >
                         <option>{ "Anyone" }</option>
-                        { for self.users.iter().map(|user| html! {
-                            <option>{ user.name.clone() }</option>
+                        { for self.sorted_usernames.iter().map(|username| html! {
+                            <option>{ username.clone() }</option>
                         }) }
                     </select>
                  </label>
 
                 <button
                     onclick=self.link.callback(|_| Self::Message::Start)
-                    disabled=self.is_running
+                    disabled=matches!(self.state, State::Started { .. })
                 > { "Launch" } </button>
             </div>
 
             <hr />
 
-            <div hidden=!self.is_running>
-                <div style=concat!(
-                    "display: flex;",
-                    "flex-direction: column;",
-                )>
-                    { "Transactions sent: 17/343" }
-                    <br />
-                    { "Transactions confirmed: 14/17" }
-                </div>
+            { if let State::Started { started_at, sent_tx, confirmed_tx, total_tx } = self.state {
+                  Speedtest::view_speedtest(sent_tx, confirmed_tx, total_tx, Local::now() - started_at)
+             } else if let State::Done { elapsed, total_tx } = self.state {
+                  Speedtest::view_speedtest(total_tx, total_tx, total_tx, elapsed)
+             } else {
+                 html! {}
+             } }
 
-                <p> { "Running for 0.1s" } </p>
-
-                <div style=concat!(
-                    "display: flex;",
-                    "flex-direction: column;",
-                )>
-                    { "AT2's TPS: 170" }
-                    <br />
-                    { "Bitcoin's TPS: 7" }
-                    <br />
-                    { "Ethereum's TPS: 25" }
-                </div>
-            </div>
 
         </> }
+    }
+}
+
+impl Speedtest {
+    fn view_speedtest(
+        sent_tx: usize,
+        confirmed_tx: usize,
+        total_tx: usize,
+        elapsed: Duration,
+    ) -> Html {
+        let tps = (confirmed_tx as u64 * 1000)
+            .checked_div(elapsed.num_milliseconds() as u64)
+            .unwrap_or(0); // TODO show a "computing" text
+
+        html! { <div style=concat!( "display: flex;", "flex-direction: column;")>
+                { format!("Transactions sent: {}/{}", sent_tx, total_tx) }
+                <br />
+                { format!("Transactions confirmed_tx: {}/{}", confirmed_tx, total_tx) }
+
+                <p> { format!("Running for {}s", elapsed.num_seconds()) } </p>
+
+                { "AT2's TPS: " } { tps }
+                <br />
+                { "Bitcoin's TPS: 7" }
+                <br />
+                { "Ethereum's TPS: 25" }
+            </div>
+        }
     }
 }

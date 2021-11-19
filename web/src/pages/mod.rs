@@ -133,7 +133,10 @@ impl Component for Pages {
                         user=self.user.clone()
                         bump_sequence=self.link.callback(Self::Message::SequenceBumped)
                     /> },
-                    3 => html! { <Speedtest/> },
+                    3 => html! { <Speedtest
+                        user=self.user.clone()
+                        bump_sequence=self.link.callback(Self::Message::SequenceBumped)
+                    /> },
                     4 => html! { <Summary/> },
                     _ => panic!("unreachable"),
                 } }
