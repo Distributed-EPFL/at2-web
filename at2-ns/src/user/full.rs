@@ -1,5 +1,7 @@
 use drop::crypto::sign;
 
+use super::ThinUser;
+
 /// User with a KeyPair
 #[derive(Debug, Clone, PartialEq)]
 pub struct FullUser {
@@ -22,5 +24,10 @@ impl FullUser {
     /// Return the keypair used
     pub fn keypair(&self) -> &sign::KeyPair {
         &self.keypair
+    }
+
+    /// Return a thin version of the user
+    pub fn to_thin(self) -> ThinUser {
+        ThinUser::new(self.name, self.keypair.public())
     }
 }
