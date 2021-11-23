@@ -137,7 +137,8 @@ impl Component for YourAccount {
                 ret.unwrap(); // TODO send asset in dialog
                 false
             }
-            Self::Message::LatestTransactionsGot(latest_transactions) => {
+            Self::Message::LatestTransactionsGot(mut latest_transactions) => {
+                latest_transactions.reverse();
                 self.latest_transactions = latest_transactions;
                 true
             }
