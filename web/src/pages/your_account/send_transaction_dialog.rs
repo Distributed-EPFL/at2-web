@@ -132,7 +132,7 @@ impl Component for SendTransactionDialog {
 
                     <MatListItem>
                         <MatFormfield
-                            label="Public key"
+                            label="Public key:"
                             align_end=true
                         > { self.props.user.as_ref().map(|user| user.public_key().to_string()).unwrap_or_else(|| "...".to_string()) } </MatFormfield>
                     </MatListItem>
