@@ -8,6 +8,8 @@ use yew::{prelude::*, services::ConsoleService, worker::Agent};
 
 use crate::agents;
 
+const TRANSFER_PER_REFRESH: usize = 50;
+
 #[derive(Properties, Clone)]
 pub struct Properties {
     /// User's account
@@ -103,9 +105,11 @@ impl Component for Speedtest {
             Self::Message::TransactionSent(_) => {
                 if let State::Started { sent_tx, .. } = &mut self.state {
                     *sent_tx += 1;
-                }
 
-                true
+                    *sent_tx % TRANSFER_PER_REFRESH == 0
+                } else {
+                    false
+                }
             }
 
             Self::Message::GotUsers(users) => {
@@ -189,24 +193,34 @@ impl Component for Speedtest {
             }
             Self::Message::Running {
                 users_to_send_to,
-                remaining,
+                mut remaining,
             } => {
                 if let State::Started { total_tx, .. } = self.state {
                     let sender = self.props.user.0.clone();
                     let recipient = users_to_send_to.choose(&mut thread_rng()).unwrap(); // can't be empty
-                    let sequence = self.props.user.1 + (total_tx - remaining) as u32 + 1;
+                    let base_sequence =
+                        self.props.user.1 + (total_tx - remaining) as sieve::Sequence + 1;
 
-                    // TODO consider sending many call
-                    self.send_asset_agent
-                        .send((sender, sequence, recipient.clone(), 1));
+                    let transfers_count = remaining.min(TRANSFER_PER_REFRESH);
+                    for sequence in
+                        (0..transfers_count).map(|i| base_sequence + i as sieve::Sequence)
+                    {
+                        self.send_asset_agent.send((
+                            sender.clone(),
+                            sequence,
+                            recipient.clone(),
+                            1,
+                        ));
+                    }
+                    remaining -= transfers_count;
 
                     let callback = self.link.callback(|m| m);
-                    if remaining > 1 {
+                    if remaining > 0 {
                         // trigger refresh
                         Timeout::new(0, move || {
                             callback.emit(Self::Message::Running {
                                 users_to_send_to,
-                                remaining: remaining - 1,
+                                remaining,
                             })
                         })
                         .forget();
