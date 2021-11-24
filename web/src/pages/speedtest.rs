@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use at2_ns::{FullUser, ThinUser};
 use chrono::{offset::Local, DateTime, Duration};
 use gloo_timers::callback::{Interval, Timeout};
+use material_yew::{MatButton, MatFormfield, MatLinearProgress, MatList, MatListItem};
 use rand::{seq::SliceRandom, thread_rng};
 use yew::{prelude::*, services::ConsoleService, worker::Agent};
 
@@ -197,7 +198,6 @@ impl Component for Speedtest {
             } => {
                 if let State::Started { total_tx, .. } = self.state {
                     let sender = self.props.user.0.clone();
-                    let recipient = users_to_send_to.choose(&mut thread_rng()).unwrap(); // can't be empty
                     let base_sequence =
                         self.props.user.1 + (total_tx - remaining) as sieve::Sequence + 1;
 
@@ -208,7 +208,7 @@ impl Component for Speedtest {
                         self.send_asset_agent.send((
                             sender.clone(),
                             sequence,
-                            recipient.clone(),
+                            users_to_send_to.choose(&mut thread_rng()).unwrap().clone(), // can't be empty
                             1,
                         ));
                     }
@@ -246,45 +246,52 @@ impl Component for Speedtest {
                    for many more transactions per second (TPS) than currently
                    existing blockchains. Here you can actually test it,
                    flooding the servers with transactions." }
+            <br />
+                { "Bear in mind that the transactions are send by your browser
+                   to a node, then send on the actual network. This greatly reduce
+                   the computed TPS." }
             </p>
 
             <hr />
 
-            <div style=concat!(
-                "display: flex;",
-                "flex-direction: column;",
-                "align-items: center;",
-            )>
-                <label> { "How many transactions to send" }
-                    <input
-                        oninput=self.link.callback(|event: InputData|
-                            Self::Message::UpdateTransactionAmount(event.value.parse().ok()))
-                        value=self.amount.to_string()
-                        min=1
-                        type={ "number" }
-                    />
-                 </label>
+            <MatList>
+                <MatListItem>
+                    <MatFormfield label="How many transactions to send" align_end=true>
+                        <input
+                            oninput=self.link.callback(|event: InputData|
+                                Self::Message::UpdateTransactionAmount(event.value.parse().ok()))
+                            value=self.amount.to_string()
+                            min=1
+                            type={ "number" }
+                        />
+                    </MatFormfield>
+                </MatListItem>
 
-                <label>
-                    { "To whom to send to" }
-                    <select
-                        onchange=self.link.callback(|event: ChangeData| match event {
-                            ChangeData::Select(elem) => Self::Message::UpdateUser(elem.value()),
-                            _ => unreachable!(),
-                        })
-                    >
-                        <option>{ "Anyone" }</option>
-                        { for self.sorted_usernames.iter().map(|username| html! {
-                            <option>{ username.clone() }</option>
-                        }) }
-                    </select>
-                 </label>
+                <MatListItem>
+                    <MatFormfield label="To whom to send to" align_end=true>
+                        <select
+                            onchange=self.link.callback(|event: ChangeData| match event {
+                                ChangeData::Select(elem) => Self::Message::UpdateUser(elem.value()),
+                                _ => unreachable!(),
+                            })
+                        >
+                            <option>{ "Anyone" }</option>
+                            { for self.sorted_usernames.iter().map(|username| html! {
+                                <option>{ username.clone() }</option>
+                            }) }
+                        </select>
+                    </MatFormfield>
+                </MatListItem>
 
-                <button
-                    onclick=self.link.callback(|_| Self::Message::Start)
-                    disabled=matches!(self.state, State::Started { .. })
-                > { "Launch" } </button>
-            </div>
+                <MatListItem>
+                    <span
+                        onclick=self.link.callback(|_| Self::Message::Start)
+                    ><MatButton
+                        label="Launch"
+                        disabled=matches!(self.state, State::Started { .. })
+                    /></span>
+                </MatListItem>
+            </MatList>
 
             <hr />
 
@@ -295,36 +302,63 @@ impl Component for Speedtest {
              } else {
                  html! {}
              } }
-
-
         </> }
     }
 }
 
 impl Speedtest {
+    fn progress_bar(label: &'static str, progress: f32) -> Html {
+        html! {
+            <MatFormfield
+                label=label
+                align_end=true
+            >
+                <span style="display: block; width: 500px;">
+                    <MatLinearProgress
+                        buffer=1f32
+                        reverse=true
+                        progress=2f32 * progress
+                    />
+                </span>
+            </MatFormfield>
+        }
+    }
+
     fn view_speedtest(
         sent_tx: usize,
         confirmed_tx: usize,
         total_tx: usize,
         elapsed: Duration,
     ) -> Html {
-        let tps = (confirmed_tx as u64 * 1000)
-            .checked_div(elapsed.num_milliseconds() as u64)
-            .unwrap_or(0); // TODO show a "computing" text
+        let tps = (confirmed_tx as u64 * 1000).checked_div(elapsed.num_milliseconds() as u64);
 
-        html! { <div style=concat!( "display: flex;", "flex-direction: column;")>
-                { format!("Transactions sent: {}/{}", sent_tx, total_tx) }
-                <br />
-                { format!("Transactions confirmed_tx: {}/{}", confirmed_tx, total_tx) }
+        html! { <MatList>
+            <MatListItem> { Speedtest::progress_bar(
+                "Transactions sent",
+                (sent_tx as f32)/(total_tx as f32)
+            ) } </MatListItem>
+            <MatListItem> { Speedtest::progress_bar(
+                "Transactions confirmed_tx",
+                (confirmed_tx as f32)/(total_tx as f32)
+            ) } </MatListItem>
 
-                <p> { format!("Running for {}s", elapsed.num_seconds()) } </p>
+            <MatListItem>
+                { format!("Running for {}s", elapsed.num_seconds()) }
+            </MatListItem>
 
-                { "AT2's TPS: " } { tps }
-                <br />
+            <MatListItem>
+                { "AT2's computed TPS: " } {
+                    tps
+                        .map(|tps| html! { tps })
+                        .unwrap_or(html! { <span style="color: lightgrey"> { "computing" } </span> })
+                }
+            </MatListItem>
+            <MatListItem>
                 { "Bitcoin's TPS: 7" }
-                <br />
+            </MatListItem>
+            <MatListItem>
                 { "Ethereum's TPS: 25" }
-            </div>
-        }
+            </MatListItem>
+        </MatList> }
     }
 }
