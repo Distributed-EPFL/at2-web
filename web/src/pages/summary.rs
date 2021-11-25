@@ -22,7 +22,21 @@ impl Component for Summary {
         html! { <>
             <h1> { "Summary" } </h1>
 
-            <p> { "We showed that AT2 is faster than bitcoin." } </p>
+            <p> { "We showed that AT2 is faster than other well known
+                   blockchains. It achieves that speed by avoiding to
+                   sync a common state, the global consensus. Most
+                   blockchains are still using this method, but AT2's
+                   paper demonstrates that it is unneeded to transfer
+                   assets inside a network."
+            } </p>
+
+            <p> { "If you are interested in exploring this project more,
+                   look at " }
+                <a href="https://factory.c4dt.org/showcase/at2">
+                    { "the project page" }
+                </a>
+                { "." }
+            </p>
         </> }
     }
 }
