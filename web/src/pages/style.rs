@@ -22,8 +22,16 @@ impl Component for Style {
     fn view(&self) -> Html {
         html! { <style> { "
             body {
-                font-family: Roboto, sans-serif;
                 margin-left: 0px;
+            }
+
+            * {
+                font-family: Roboto, sans-serif;
+                font-weight: 400;
+                letter-spacing: 0.25px;
+            }
+            p {
+                font-size: 14px;
             }
 
             .boxes {
