@@ -1,6 +1,6 @@
 use std::{borrow::Cow, mem};
 
-use at2_ns::ThinUser;
+use at2_ns::Contact;
 use material_yew::{
     dialog::{ActionType, MatDialogAction},
     MatButton, MatDialog, MatFormfield, MatList, MatListItem, WeakComponentLink,
@@ -17,12 +17,12 @@ pub struct Properties {
     ///
     /// It's an Option to workaround a material-yew bug, so that the MatDialog can still be created
     /// even without any content
-    pub user: Option<ThinUser>,
+    pub user: Option<Contact>,
     /// Link to the MatDialog
     pub dialog_link: WeakComponentLink<MatDialog>,
 
     /// Where to send the transaction
-    pub on_send: Callback<(ThinUser, usize)>,
+    pub on_send: Callback<(Contact, usize)>,
 }
 
 pub struct SendTransactionDialog {

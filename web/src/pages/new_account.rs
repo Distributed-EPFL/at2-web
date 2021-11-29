@@ -1,6 +1,6 @@
 use at2_ns::{
     client::{self, Client},
-    FullUser,
+    User,
 };
 use material_yew::{MatButton, MatTextField};
 use wasm_bindgen_futures::spawn_local;
@@ -11,17 +11,17 @@ use crate::config::Config;
 #[derive(Properties, Clone, PartialEq)]
 pub struct Properties {
     /// User to create
-    pub user: FullUser,
+    pub user: User,
     /// Was the user already created
     pub user_created: bool,
     /// Where to send to created user with a potentially different name that the one given
-    pub on_new_user: Callback<Box<FullUser>>,
+    pub on_new_user: Callback<Box<User>>,
 }
 
 pub enum Message {
     SetUsername(String),
     CreateUser,
-    UserPut(Result<Box<FullUser>, client::Error>),
+    UserPut(Result<Box<User>, client::Error>),
 }
 
 pub struct NewAccount {

@@ -1,5 +1,5 @@
 use at2_node::client::{self, Client};
-use at2_ns::{FullUser, ThinUser};
+use at2_ns::{User, Contact};
 use wasm_bindgen_futures::spawn_local;
 use yew::worker::*;
 
@@ -14,7 +14,7 @@ pub struct SendAsset {
 impl Agent for SendAsset {
     type Reach = Context<Self>;
     type Message = (HandlerId, Result<(), client::Error>);
-    type Input = (FullUser, sieve::Sequence, ThinUser, u64);
+    type Input = (User, sieve::Sequence, Contact, u64);
     type Output = Result<(), client::Error>;
 
     fn create(link: AgentLink<Self>) -> Self {

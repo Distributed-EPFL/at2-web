@@ -1,15 +1,15 @@
 use drop::crypto::sign;
 
-/// User on the network
+/// Other users on the network
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct ThinUser {
+pub struct Contact {
     /// Name of this user
     pub name: String,
     public_key: sign::PublicKey,
 }
 
-impl ThinUser {
-    /// New user
+impl Contact {
+    /// New contact
     pub fn new(name: String, public_key: sign::PublicKey) -> Self {
         Self { name, public_key }
     }

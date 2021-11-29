@@ -133,7 +133,7 @@ impl AccountsHandler {
 
 #[cfg(test)]
 mod tests {
-    use at2_ns::FullUser;
+    use at2_ns::User;
     use drop::crypto::sign::KeyPair;
 
     use super::Accounts;
@@ -141,7 +141,7 @@ mod tests {
     #[tokio::test]
     async fn put_once_returns_it_in_get_all() {
         let accounts = Accounts::new();
-        let user = FullUser::new("user".to_owned(), KeyPair::random());
+        let user = User::new("user".to_owned(), KeyPair::random());
 
         accounts
             .put(user.public_key(), user.name.clone())
@@ -162,7 +162,7 @@ mod tests {
     #[tokio::test]
     async fn put_twice_update_name() {
         let accounts = Accounts::new();
-        let user = FullUser::new("user".to_owned(), KeyPair::random());
+        let user = User::new("user".to_owned(), KeyPair::random());
 
         accounts
             .put(user.public_key(), "first".to_owned())
@@ -188,8 +188,8 @@ mod tests {
     async fn put_for_same_name_with_different_pubkey_fails() {
         let accounts = Accounts::new();
 
-        let first_user = FullUser::new("user".to_owned(), KeyPair::random());
-        let second_user = FullUser::new("user".to_owned(), KeyPair::random());
+        let first_user = User::new("user".to_owned(), KeyPair::random());
+        let second_user = User::new("user".to_owned(), KeyPair::random());
 
         accounts
             .put(first_user.public_key(), first_user.name.clone())
@@ -205,8 +205,8 @@ mod tests {
     async fn update_name_for_another_already_existing() {
         let accounts = Accounts::new();
 
-        let first_user = FullUser::new("user".to_owned(), KeyPair::random());
-        let second_user = FullUser::new("usr".to_owned(), KeyPair::random());
+        let first_user = User::new("user".to_owned(), KeyPair::random());
+        let second_user = User::new("usr".to_owned(), KeyPair::random());
 
         accounts
             .put(first_user.public_key(), first_user.name.clone())

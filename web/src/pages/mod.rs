@@ -5,7 +5,7 @@ mod summary;
 mod welcome;
 mod your_account;
 
-use at2_ns::FullUser;
+use at2_ns::User;
 use drop::crypto::sign;
 use material_yew::MatButton;
 use new_account::NewAccount;
@@ -20,7 +20,7 @@ pub enum Message {
     PreviousPage,
     NextPage,
 
-    UserCreated(Box<FullUser>),
+    UserCreated(Box<User>),
     SequenceBumped(sieve::Sequence),
 }
 
@@ -31,7 +31,7 @@ pub struct Pages {
     link: ComponentLink<Self>,
     index: usize,
 
-    user: (FullUser, sieve::Sequence),
+    user: (User, sieve::Sequence),
     user_created: bool,
 }
 
@@ -44,7 +44,7 @@ impl Component for Pages {
             link,
             index: 0,
 
-            user: (FullUser::new("".to_owned(), sign::KeyPair::random()), 0),
+            user: (User::new("".to_owned(), sign::KeyPair::random()), 0),
             user_created: false,
         }
     }

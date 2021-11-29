@@ -1,7 +1,7 @@
 use std::{collections::HashMap, convert::TryInto};
 
 use at2_node::{FullTransaction, TransactionState};
-use at2_ns::{FullUser, ThinUser};
+use at2_ns::{User, Contact};
 use chrono::Utc;
 use chrono_humanize::HumanTime;
 use drop::crypto::sign;
@@ -17,7 +17,7 @@ use send_transaction_dialog::SendTransactionDialog;
 #[derive(Properties, Clone)]
 pub struct Properties {
     /// User's account
-    pub user: (FullUser, sieve::Sequence),
+    pub user: (User, sieve::Sequence),
     /// Where to send the new sequence when the current one is used
     pub bump_sequence: Callback<sieve::Sequence>,
 }
@@ -34,11 +34,11 @@ pub struct YourAccount {
     get_latest_transactions_agent: Box<dyn Bridge<agents::GetLatestTransactions>>,
 
     sorted_usernames: Vec<String>,
-    username_to_user: HashMap<String, ThinUser>,
+    username_to_user: HashMap<String, Contact>,
     pubkey_to_username: HashMap<sign::PublicKey, String>,
 
     dialog_link: WeakComponentLink<MatDialog>,
-    dialog_user: Option<ThinUser>,
+    dialog_user: Option<Contact>,
 
     latest_transactions: Vec<FullTransaction>,
 }
@@ -49,7 +49,7 @@ pub enum Message {
     LatestTransactionsGot(<agents::GetLatestTransactions as Agent>::Output),
 
     ClickUser(Option<String>),
-    SendTransaction((ThinUser, usize)),
+    SendTransaction((Contact, usize)),
 }
 
 impl Component for YourAccount {
