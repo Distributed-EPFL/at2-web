@@ -2,6 +2,7 @@ use drop::crypto::sign;
 
 /// Other users on the network
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Contact {
     /// Name of this user
     pub name: String,
