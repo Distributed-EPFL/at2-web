@@ -1,5 +1,5 @@
 use at2_node::client::{self, Client};
-use at2_ns::ThinUser;
+use at2_ns::Contact;
 use wasm_bindgen_futures::spawn_local;
 use yew::worker::*;
 
@@ -14,7 +14,7 @@ pub struct GetBalance {
 impl Agent for GetBalance {
     type Reach = Context<Self>;
     type Message = (HandlerId, Result<u64, client::Error>);
-    type Input = ThinUser;
+    type Input = Contact;
     type Output = Result<u64, client::Error>;
 
     fn create(link: AgentLink<Self>) -> Self {

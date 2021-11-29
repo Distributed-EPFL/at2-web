@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use at2_ns::{FullUser, ThinUser};
+use at2_ns::{User, Contact};
 use chrono::{offset::Local, DateTime, Duration};
 use gloo_timers::callback::{Interval, Timeout};
 use material_yew::{MatButton, MatFormfield, MatLinearProgress, MatList, MatListItem};
@@ -14,7 +14,7 @@ const TRANSFER_PER_REFRESH: usize = 50;
 #[derive(Properties, Clone)]
 pub struct Properties {
     /// User's account
-    pub user: (FullUser, sieve::Sequence),
+    pub user: (User, sieve::Sequence),
     /// Where to send the new sequence when the current one is used
     pub bump_sequence: Callback<sieve::Sequence>,
 }
@@ -28,7 +28,7 @@ pub struct Speedtest {
     send_asset_agent: Box<dyn Bridge<agents::SendAsset>>,
 
     sorted_usernames: Vec<String>,
-    username_to_user: HashMap<String, ThinUser>,
+    username_to_user: HashMap<String, Contact>,
 
     amount: usize,
     to_username: Option<String>,
@@ -63,7 +63,7 @@ pub enum Message {
 
     Start,
     Running {
-        users_to_send_to: Vec<ThinUser>,
+        users_to_send_to: Vec<Contact>,
         remaining: usize,
     },
 }

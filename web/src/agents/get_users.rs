@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use at2_ns::{client::Client, ThinUser};
+use at2_ns::{client::Client, Contact};
 use gloo_timers::callback::Interval;
 use wasm_bindgen_futures::spawn_local;
 use yew::{services::ConsoleService, worker::*};
@@ -13,7 +13,7 @@ pub struct GetUsers {
 
     #[allow(dead_code)] // drop when agent is destroyed
     refresher: Interval,
-    last_send: HashSet<ThinUser>,
+    last_send: HashSet<Contact>,
 
     subscribers: HashSet<HandlerId>,
     subscribers_changed_since_last_sent: bool,
@@ -21,9 +21,9 @@ pub struct GetUsers {
 
 impl Agent for GetUsers {
     type Reach = Context<Self>;
-    type Message = HashSet<ThinUser>;
+    type Message = HashSet<Contact>;
     type Input = ();
-    type Output = HashSet<ThinUser>;
+    type Output = HashSet<Contact>;
 
     fn create(link: AgentLink<Self>) -> Self {
         let conf = Config::parse();

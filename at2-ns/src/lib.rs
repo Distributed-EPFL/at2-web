@@ -9,4 +9,7 @@ pub mod proto;
 pub mod client;
 
 mod user;
-pub use user::{FullUser, ThinUser};
+pub use user::User;
+
+mod contact;
+pub use contact::Contact;

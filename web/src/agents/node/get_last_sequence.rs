@@ -1,5 +1,5 @@
 use at2_node::client::{self, Client};
-use at2_ns::ThinUser;
+use at2_ns::Contact;
 use wasm_bindgen_futures::spawn_local;
 use yew::worker::*;
 
@@ -18,7 +18,7 @@ pub struct GetLastSequence {
 impl Agent for GetLastSequence {
     type Reach = Context<Self>;
     type Message = (HandlerId, Result<sieve::Sequence, client::Error>);
-    type Input = ThinUser;
+    type Input = Contact;
     type Output = Result<sieve::Sequence, client::Error>;
 
     fn create(link: AgentLink<Self>) -> Self {
