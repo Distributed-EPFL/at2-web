@@ -6,7 +6,7 @@ edition = "2021"
 license = "AGPL-3.0-only"
 
 [dependencies]
-at2-ns = { path = "../at2-ns" }
+at2-ns = { path = "../at2-ns", features = ["serde"] }
 at2-node = { git = "https://github.com/Distributed-EPFL/at2-node.git" }
 drop = { git = "https://github.com/Distributed-EPFL/drop.git" }
 sieve = { git = "https://github.com/Distributed-EPFL/sieve" }

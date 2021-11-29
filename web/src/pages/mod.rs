@@ -13,7 +13,11 @@ use speedtest::Speedtest;
 pub use style::Style;
 use summary::Summary;
 use welcome::Welcome;
-use yew::prelude::*;
+use yew::{
+    format::Json,
+    prelude::*,
+    services::storage::{Area, StorageService},
+};
 use your_account::YourAccount;
 
 pub enum Message {
@@ -25,6 +29,7 @@ pub enum Message {
 }
 
 const PAGE_COUNT: usize = 5;
+const STORAGE_KEY: &str = "at2-user";
 
 /// Component showing the pages
 pub struct Pages {
@@ -40,12 +45,23 @@ impl Component for Pages {
     type Message = Message;
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
+        let (user, user_created) = if let Ok(Json(Ok(stored))) =
+            StorageService::new(Area::Local).map(|storage| storage.restore::<Json<_>>(STORAGE_KEY))
+        {
+            (stored, true)
+        } else {
+            (
+                (User::new("".to_owned(), sign::KeyPair::random()), 0),
+                false,
+            )
+        };
+
         Self {
             link,
             index: 0,
 
-            user: (User::new("".to_owned(), sign::KeyPair::random()), 0),
-            user_created: false,
+            user,
+            user_created,
         }
     }
 
@@ -62,10 +78,20 @@ impl Component for Pages {
             Self::Message::UserCreated(user) => {
                 self.user.0 = *user;
                 self.user_created = true;
+
+                if let Ok(mut storage) = StorageService::new(Area::Local) {
+                    storage.store(STORAGE_KEY, Json(&self.user));
+                };
+
                 true
             }
             Self::Message::SequenceBumped(seq) => {
                 self.user.1 = seq;
+
+                if let Ok(mut storage) = StorageService::new(Area::Local) {
+                    storage.store(STORAGE_KEY, Json(&self.user));
+                };
+
                 true
             }
         }
