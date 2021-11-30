@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use at2_ns::{User, Contact};
+use at2_ns::{Contact, User};
 use chrono::{offset::Local, DateTime, Duration};
 use gloo_timers::callback::{Interval, Timeout};
 use material_yew::{MatButton, MatFormfield, MatLinearProgress, MatList, MatListItem};
@@ -343,21 +343,21 @@ impl Speedtest {
             ) } </MatListItem>
 
             <MatListItem>
-                { format!("Running for {}s", elapsed.num_seconds()) }
+                <p> { format!("Running for {}s", elapsed.num_seconds()) } </p>
             </MatListItem>
 
             <MatListItem>
-                { "AT2's computed TPS: " } {
+                <p> { "AT2's computed TPS: " } {
                     tps
                         .map(|tps| html! { tps })
                         .unwrap_or(html! { <span style="color: lightgrey"> { "computing" } </span> })
-                }
+                } </p>
             </MatListItem>
             <MatListItem>
-                { "Bitcoin's TPS: 7" }
+                <p> { "Bitcoin's TPS: 7" } </p>
             </MatListItem>
             <MatListItem>
-                { "Ethereum's TPS: 25" }
+                <p> { "Ethereum's TPS: 25" } </p>
             </MatListItem>
         </MatList> }
     }

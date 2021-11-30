@@ -27,11 +27,18 @@ impl Component for Style {
 
             * {
                 font-family: Roboto, sans-serif;
+                line-height: 1.25rem;
                 font-weight: 400;
-                letter-spacing: 0.25px;
             }
             p {
-                font-size: 14px;
+                font-size: 0.875rem;
+            }
+
+            @media (prefers-color-scheme: dark) {
+                html {
+                  --mdc-theme-primary: black;
+                  --mdc-theme-text-primary-on-background: var(--light-grey);
+                }
             }
 
             .boxes {
