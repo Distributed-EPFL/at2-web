@@ -1,7 +1,7 @@
 use std::{collections::HashMap, convert::TryInto};
 
 use at2_node::{FullTransaction, TransactionState};
-use at2_ns::{User, Contact};
+use at2_ns::{Contact, User};
 use chrono::Utc;
 use chrono_humanize::HumanTime;
 use drop::crypto::sign;
@@ -156,15 +156,18 @@ impl Component for YourAccount {
         html! { <>
             <h1> { "Your account" } </h1>
 
-            <p>
-                { "Now, you're registered on the chain." }
-                <br />
-                { "As with BitCoin, you have a wallet, already populated." }
-                <br />
-                { "Below, you can play by sending some money to the other
-                  members of the network. Click on any name, send some money
-                  and see your transaction being validated." }
-            </p>
+            <p> { "
+                Now, you're registered on the chain.
+                As with BitCoin, you have a wallet, already populated.
+            " } <br /> { "
+                Below, you can play by sending some money to the other members
+                of the network. Click on any name, send some asset and see your
+                transaction being validated.
+            " } <br /> { "
+                The most recent transactions will appear below, if you see it
+                changing rapidly, that's probably because someone else is
+                running a speedtest.
+            " } </p>
 
             <hr />
 

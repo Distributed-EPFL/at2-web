@@ -241,16 +241,20 @@ impl Component for Speedtest {
         html! { <>
             <h1> { "Speedtest" } </h1>
 
-            <p>
-                { "One of the most interesting feature of AT2 is that it allows
-                   for many more transactions per second (TPS) than currently
-                   existing blockchains. Here you can actually test it,
-                   flooding the servers with transactions." }
-            <br />
-                { "Bear in mind that the transactions are send by your browser
-                   to a node, then send on the actual network. This greatly reduce
-                   the computed TPS." }
-            </p>
+            <p> { "
+                One of the most interesting features of AT2 is that it allows
+                for many more transactions per second (TPS) than currently
+                existing blockchains.
+                Here you can actually test it, flooding the servers with
+                transactions.
+            " } <br /> { "
+                Bear in mind that the transactions are sent by your browser to
+                a node, which then forwards them on the actual network.
+                This greatly reduces the computed TPS as opposed to sending
+                your transactions using your node directly as you would do in
+                a more realistic use case and means that the TPS measured here
+                is below the speed reported in the paper.
+            " } </p>
 
             <hr />
 
