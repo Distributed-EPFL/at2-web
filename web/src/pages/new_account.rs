@@ -139,7 +139,7 @@ impl Component for NewAccount {
                 { for network.iter().map(|node| html! {
                     <MatButton
                         label=node.to_owned()
-                        outlined=true
+                        unelevated=true
                     />
                 }) }
             </span>
