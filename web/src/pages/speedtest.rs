@@ -312,7 +312,7 @@ impl Component for Speedtest {
 }
 
 impl Speedtest {
-    fn progress_bar(label: &'static str, progress: f32) -> Html {
+    fn progress_bar(progress: f32) -> Html {
         assert!(
             (0.0..=1.0).contains(&progress),
             "progress out of range: {:?}",
@@ -322,18 +322,13 @@ impl Speedtest {
         // MatLinearProgress is broken, this workaround looks fine
 
         html! {
-            <MatFormfield
-                label=label
-                align_end=true
-            >
-                <span style="display: block; width: 500px;">
-                    <MatLinearProgress
-                        buffer=1.0
-                        reverse=true
-                        progress=2.0 - 2.0*progress
-                    />
-                </span>
-            </MatFormfield>
+            <span style="display: block; width: 20em;">
+                <MatLinearProgress
+                    buffer=1.0
+                    reverse=true
+                    progress=2.0 - 2.0*progress
+                />
+            </span>
         }
     }
 
@@ -345,33 +340,35 @@ impl Speedtest {
     ) -> Html {
         let tps = (confirmed_tx as u64 * 1000).checked_div(elapsed.num_milliseconds() as u64);
 
-        html! { <MatList>
-            <MatListItem> { Speedtest::progress_bar(
-                "Transactions sent",
-                (sent_tx as f32)/(total_tx as f32)
-            ) } </MatListItem>
-            <MatListItem> { Speedtest::progress_bar(
-                "Transactions confirmed_tx",
-                (confirmed_tx as f32)/(total_tx as f32)
-            ) } </MatListItem>
+        const FIRST_COL: &str = "text-align: end; padding: 0 1em";
 
-            <MatListItem>
-                <p> { format!("Running for {}s", elapsed.num_seconds()) } </p>
-            </MatListItem>
+        html! { <table>
+            <tr>
+                <td style=FIRST_COL> { "Transactions sent" } </td>
+                <td> { Speedtest::progress_bar(sent_tx as f32/total_tx as f32) } </td>
+            </tr>
+            <tr>
+                <td style=FIRST_COL> { "Transactions confirmed" } </td>
+                <td> { Speedtest::progress_bar(confirmed_tx as f32/total_tx as f32) } </td>
+            </tr>
 
-            <MatListItem>
-                <p> { "AT2's computed TPS: " } {
-                    tps
-                        .map(|tps| html! { tps })
-                        .unwrap_or(html! { <span style="color: lightgrey"> { "computing" } </span> })
-                } </p>
-            </MatListItem>
-            <MatListItem>
-                <p> { "Bitcoin's TPS: 7" } </p>
-            </MatListItem>
-            <MatListItem>
-                <p> { "Ethereum's TPS: 25" } </p>
-            </MatListItem>
-        </MatList> }
+            <tr>
+                <td style=FIRST_COL> { "Running for" } </td>
+                <td> { format!("{}s", elapsed.num_seconds()) } </td>
+            </tr>
+
+            <tr>
+                <td style=FIRST_COL> { "AT2's computed TPS" } </td>
+                <td> { tps.unwrap_or(0) } </td>
+            </tr>
+            <tr>
+                <td style=FIRST_COL> { "Bitcoin's TPS" } </td>
+                <td> { 7 } </td>
+            </tr>
+            <tr>
+                <td style=FIRST_COL> { "Ethereum's TPS" } </td>
+                <td> { 25 } </td>
+            </tr>
+        </table> }
     }
 }
