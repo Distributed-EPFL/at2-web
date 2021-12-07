@@ -157,10 +157,10 @@ impl Component for YourAccount {
             <h1> { "Your account" } </h1>
 
             <p> { "
-                Now, you're registered on the chain.
-                As with BitCoin, you have a wallet, already populated.
+                Now, your account is registered on the chain.
+                As with BitCoin, you have a wallet, which is already populated.
             " } <br /> { "
-                Below, you can play by sending some money to the other members
+                Below, you can play by sending some asset to the other members
                 of the network. Click on any name, send some asset and see your
                 transaction being validated.
             " } <br /> { "
