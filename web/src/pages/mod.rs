@@ -64,7 +64,13 @@ impl Component for Pages {
             ((user, seq), true)
         } else {
             (
-                (User::new("".to_owned(), sign::KeyPair::random()), 0),
+                (
+                    User::new(
+                        names::Generator::default().next().unwrap(), // can't fail
+                        sign::KeyPair::random(),
+                    ),
+                    0,
+                ),
                 false,
             )
         };
