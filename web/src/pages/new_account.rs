@@ -89,9 +89,6 @@ impl Component for NewAccount {
     }
 
     fn view(&self) -> Html {
-        // TODO fetch network
-        let network = ["C4DT", "DCL", "ineiti"];
-
         html! { <>
             <h1> { "New account" } </h1>
 
@@ -140,14 +137,48 @@ impl Component for NewAccount {
             <hr />
 
             <h2> { "Network" } </h2>
-            <span class=classes!("boxes") >
-                { for network.iter().map(|node| html! {
-                    <MatButton
-                        label=node.to_owned()
-                        unelevated=true
-                    />
-                }) }
-            </span>
+
+            <style> { "
+                .boxes {
+                    position: absolute;
+                    width: 20em; height: 10em;
+                    margin-left: 10em;
+                    z-index: -1;
+
+                    border: dotted var(--light-grey);
+                }
+
+                .boxes > * {
+                    position: absolute;
+                    margin: 0px;
+
+                    background-color: white;
+                    border: solid;
+                    padding: 1em 2em;
+                }
+                @media (prefers-color-scheme: dark) {
+                    .boxes > * {
+                      background-color: var(--dark-grey);
+                    }
+                }
+
+                .boxes > :nth-child(1) {
+                    top: -2em; left: -4em;
+                }
+                .boxes > :nth-child(2) {
+                    top: -2em; left: 20em;
+                }
+                .boxes > :nth-child(3) {
+                    top: 10em; left: 8em;
+                }
+            " } </style>
+
+
+            <div class=classes!("boxes")>
+                <p> { "C4DT" } </p>
+                <p> { "DCL" } </p>
+                <p> { "ineiti" } </p>
+            </div>
         </> }
     }
 }
