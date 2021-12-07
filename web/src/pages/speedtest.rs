@@ -292,6 +292,7 @@ impl Component for Speedtest {
                         onclick=self.link.callback(|_| Self::Message::Start)
                     ><MatButton
                         label="Launch"
+                        raised=true
                         disabled=matches!(self.state, State::Started { .. })
                     /></span>
                 </MatListItem>
