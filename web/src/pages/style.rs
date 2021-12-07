@@ -37,6 +37,7 @@ impl Component for Style {
             @media (prefers-color-scheme: dark) {
                 html {
                   --mdc-theme-primary: black;
+                  --mdc-theme-surface: var(--dark-grey);
                   --mdc-theme-text-primary-on-background: var(--light-grey);
                 }
             }
