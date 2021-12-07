@@ -65,8 +65,9 @@ impl Component for Summary {
                 <a href="https://factory.c4dt.org/showcase/at2">
                     { "the project page" }
                 </a> { "
-                and contact the C4DT, we will be pleased to discuss it with you
-                in greater details."
+                and contact the "
+                } <a href="mailto:factory@c4dt.org"> { "C4DT" } </a> { ",
+                we will be pleased to discuss it with you in greater details."
             } </p>
         </> }
     }
