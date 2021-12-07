@@ -24,13 +24,13 @@ impl Component for Summary {
 
             <p> { "
                 We showed that AT2 is behaving as any other blockchain.
-                You can send assets with it, see other users on the network
-                and the latest processed transactions.
-                But using a speedtest really uncovered the true power of AT2:
-                it is faster than other well known blockchains, beating Bitcoin
-                and Etherium by a factor of 10.
+                You can send asset with it, see other users on the network
+                and see the latest processed transactions.
+                But using a speedtest really uncovers the true power of AT2:
+                it is faster than other most popular blockchains, beating
+                Bitcoin and Etherium by a factor of 10.
                 It achieves that speed by avoiding to sync a common state,
-                the global consensus, but uses a local one, allowing nodes
+                the global consensus. It uses a local one, allowing nodes
                 to validate transactions before checking them with every other
                 node on the network.
             " } </p>
@@ -40,15 +40,15 @@ impl Component for Summary {
                 browser, one can imagine using it directly as a means of
                 payment, having a little button \"pay with AT2\" next to the
                 credit cards.
-                Or you can use directly AT2 as a means of communication, an
+                Or you can use AT2 directly as a means of communication, an
                 instant chat ensuring that no rogue participant can interfere
                 or reorder the messages.
             " } </p>
 
             <p> { "
                 Most blockchains are still using the global consensus method,
-                but AT2's paper demonstrates that it is unneeded to transfer
-                assets inside a network.
+                but AT2's paper demonstrates that this it is unneeded to
+                transfer asset inside a network.
                 For the sake of transparency, there is another project based
                 on a similar technology, though not on the same papers, " }
                 <a href="https://www.avax.network/"> { "Avalanche" } </a> { ",
