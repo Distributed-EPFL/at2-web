@@ -15,6 +15,7 @@ chrono = { version = "0.4", features = ["wasmbind"] }
 gloo-timers = "0.2"
 http = "0.2"
 js-sys = "0.3"
+names = "0.12"
 rand = "0.8"
 snafu = "0.6"
 wasm-bindgen-futures = "0.4"
