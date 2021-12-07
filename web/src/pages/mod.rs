@@ -5,6 +5,7 @@ mod summary;
 mod welcome;
 mod your_account;
 
+use at2_node::client;
 use at2_ns::User;
 use drop::crypto::sign;
 use material_yew::MatButton;
@@ -20,11 +21,14 @@ use yew::{
 };
 use your_account::YourAccount;
 
+use crate::agents;
+
 pub enum Message {
     PreviousPage,
     NextPage,
 
     UserCreated(Box<User>),
+    SequenceMightBump(Result<sieve::Sequence, client::Error>),
     SequenceBumped(sieve::Sequence),
 }
 
@@ -38,6 +42,9 @@ pub struct Pages {
 
     user: (User, sieve::Sequence),
     user_created: bool,
+
+    #[allow(dead_code)] // read once
+    get_last_sequence_agent: Box<dyn Bridge<agents::GetLastSequence>>,
 }
 
 impl Component for Pages {
@@ -45,10 +52,16 @@ impl Component for Pages {
     type Message = Message;
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
+        let mut get_last_sequence_agent =
+            agents::GetLastSequence::bridge(link.callback(Self::Message::SequenceMightBump));
+
         let (user, user_created) = if let Ok(Json(Ok(stored))) =
             StorageService::new(Area::Local).map(|storage| storage.restore::<Json<_>>(STORAGE_KEY))
         {
-            (stored, true)
+            let (user, seq): (User, sieve::Sequence) = stored;
+            get_last_sequence_agent.send(user.clone().to_thin());
+
+            ((user, seq), true)
         } else {
             (
                 (User::new("".to_owned(), sign::KeyPair::random()), 0),
@@ -62,6 +75,8 @@ impl Component for Pages {
 
             user,
             user_created,
+
+            get_last_sequence_agent,
         }
     }
 
@@ -84,6 +99,16 @@ impl Component for Pages {
                 };
 
                 true
+            }
+            Self::Message::SequenceMightBump(ret) => {
+                if let Ok(seq) = ret {
+                    self.link.send_message(Self::Message::SequenceBumped(seq));
+                } else {
+                    self.get_last_sequence_agent
+                        .send(self.user.0.clone().to_thin());
+                }
+
+                false
             }
             Self::Message::SequenceBumped(seq) => {
                 self.user.1 = seq;
