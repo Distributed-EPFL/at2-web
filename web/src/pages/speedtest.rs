@@ -313,6 +313,14 @@ impl Component for Speedtest {
 
 impl Speedtest {
     fn progress_bar(label: &'static str, progress: f32) -> Html {
+        assert!(
+            (0.0..=1.0).contains(&progress),
+            "progress out of range: {:?}",
+            progress
+        );
+
+        // MatLinearProgress is broken, this workaround looks fine
+
         html! {
             <MatFormfield
                 label=label
@@ -320,9 +328,9 @@ impl Speedtest {
             >
                 <span style="display: block; width: 500px;">
                     <MatLinearProgress
-                        buffer=1f32
+                        buffer=1.0
                         reverse=true
-                        progress=2f32 * progress
+                        progress=2.0 - 2.0*progress
                     />
                 </span>
             </MatFormfield>
