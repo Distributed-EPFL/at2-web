@@ -173,7 +173,12 @@ impl Component for YourAccount {
 
             <h2> { "Addressbook" } </h2>
 
-            <span class=classes!("boxes")>
+            <span style=concat!(
+                "display: flex;",
+                "flex-wrap: wrap;",
+                "align-items: center;",
+                "justify-content: space-around;",
+            )>
                 { for self.sorted_usernames.iter().cloned().map(|username| html! {
                     <span
                         onclick=self.link.callback(|event: MouseEvent|

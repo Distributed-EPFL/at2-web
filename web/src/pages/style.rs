@@ -41,17 +41,6 @@ impl Component for Style {
                   --mdc-theme-text-primary-on-background: var(--light-grey);
                 }
             }
-
-            .boxes {
-                display: flex;
-                flex-wrap: wrap;
-                align-items: center;
-                justify-content: space-around;
-            }
-            .boxes > p {
-                border: solid;
-                padding: 1em 2em;
-            }
         " } </style> }
     }
 }
