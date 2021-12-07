@@ -30,7 +30,7 @@ impl Component for Style {
                 line-height: 1.25rem;
                 font-weight: 400;
             }
-            p {
+            p, td {
                 font-size: 0.875rem;
             }
 
