@@ -178,25 +178,30 @@ impl Component for Pages {
             }
             " } </style>
 
-            <div class=classes!("page")>
-                { match self.index {
-                    0 => html! { <Welcome/> },
-                    1 => html! { <NewAccount
-                        on_new_user=self.link.callback(Self::Message::UserCreated)
-                        user=self.user.0.clone()
-                        user_created=self.user_created
-                    /> },
-                    2 => html! { <YourAccount
-                        user=self.user.clone()
-                        bump_sequence=self.link.callback(Self::Message::SequenceBumped)
-                    /> },
-                    3 => html! { <Speedtest
-                        user=self.user.clone()
-                        bump_sequence=self.link.callback(Self::Message::SequenceBumped)
-                    /> },
-                    4 => html! { <Summary/> },
-                    _ => panic!("unreachable"),
-                } }
+            <div class=classes!("page") hidden=self.index != 0>
+                <Welcome/>
+            </div>
+            <div class=classes!("page") hidden=self.index != 1>
+                <NewAccount
+                    on_new_user=self.link.callback(Self::Message::UserCreated)
+                    user=self.user.0.clone()
+                    user_created=self.user_created
+                />
+            </div>
+            <div class=classes!("page") hidden=self.index != 2>
+                 <YourAccount
+                    user=self.user.clone()
+                    bump_sequence=self.link.callback(Self::Message::SequenceBumped)
+                />
+            </div>
+            <div class=classes!("page") hidden=self.index != 3>
+                <Speedtest
+                    user=self.user.clone()
+                    bump_sequence=self.link.callback(Self::Message::SequenceBumped)
+                />
+            </div>
+            <div class=classes!("page") hidden=self.index != 4>
+                <Summary/>
             </div>
 
             <div class=classes!("bottom")>
