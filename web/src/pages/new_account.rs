@@ -109,6 +109,10 @@ impl Component for NewAccount {
                 "display: flex;",
                 "flex-direction: column;",
             )>
+                { if !self.properties.user_created { html! { <p> {
+                    "We generate a username for you, feel free to change it."
+                } </p> } } else { html! {} } }
+
                 <div style=concat!(
                     "display: flex;",
                     "justify-content: space-around;",
