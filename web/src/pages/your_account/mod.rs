@@ -164,9 +164,10 @@ impl Component for YourAccount {
                 of the network. Click on any name, send some asset and see your
                 transaction being validated.
             " } <br /> { "
-                The most recent transactions will appear below, if you see it
-                changing rapidly, that's probably because someone else is
-                running a speedtest.
+                The most recent transactions will appear below, with the most
+                recent on top.
+                If you see it changing rapidly, that's probably because
+                someone else is running a speedtest.
             " } </p>
 
             <hr />
