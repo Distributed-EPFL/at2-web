@@ -98,9 +98,9 @@ impl Component for NewAccount {
                 asset that you can pass around.
                 This account is stored in your browser, so if you
                 clear your sites' data, you won't be able to access it again
-                (but you can recreate one).
+                (but you can recreate a new one).
             " } <br /> { "
-                You can also see the status of the network below.
+                You can also see the various servers of the network below.
             " } </p>
 
             <hr />
