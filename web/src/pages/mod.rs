@@ -45,7 +45,6 @@ pub struct Pages {
     user: (User, sieve::Sequence),
     user_created: bool,
 
-    #[allow(dead_code)] // read once
     get_last_sequence_agent: Box<dyn Bridge<agents::GetLastSequence>>,
 }
 
