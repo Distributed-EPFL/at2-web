@@ -5,6 +5,8 @@ mod summary;
 mod welcome;
 mod your_account;
 
+use std::cmp::min;
+
 use at2_node::client;
 use at2_ns::User;
 use drop::crypto::sign;
@@ -89,11 +91,11 @@ impl Component for Pages {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Self::Message::PreviousPage => {
-                self.index -= 1;
+                self.index = self.index.saturating_sub(1);
                 true
             }
             Self::Message::NextPage => {
-                self.index += 1;
+                self.index = min(self.index + 1, PAGE_COUNT - 1);
                 true
             }
             Self::Message::UserCreated(user) => {
