@@ -43,13 +43,13 @@ impl Component for Welcome {
             " } </p>
 
             <p> { "
-                This demonstrator will take you through a classic identity
+                This demonstrator will take you through a classic account
                 creation as you would do on another blockchain, but there
                 is a twist at the end.
                 First, you will create an account that will be credited
                 with some initial assets. You can then use it to send money
-                to another identity on the network, as you would do on other
-                distributed ledger.
+                to another account on the network, as you would do on other
+                distributed ledgers.
                 To show that indeed AT2 is blazingly fast, the last part is a
                 speed test where you can send as many transactions as you
                 want and measure how well the network is handling the load.
