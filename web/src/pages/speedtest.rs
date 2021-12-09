@@ -91,7 +91,7 @@ impl Component for Speedtest {
             sorted_usernames: Vec::new(),
             username_to_user: HashMap::new(),
 
-            amount: 100,
+            amount: 1000,
             to_username: None,
 
             state: State::Idle,
