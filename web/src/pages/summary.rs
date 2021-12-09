@@ -28,7 +28,9 @@ impl Component for Summary {
                 and see the latest processed transactions.
                 But using a speedtest really uncovers the true power of AT2:
                 it is faster than other most popular blockchains, beating
-                Bitcoin and Etherium by a factor of 10.
+                Bitcoin and " }
+                <a href="https://ethereum.org"> { "Ethereum" } </a>
+                { " by a factor of 10.
                 It achieves that speed by avoiding to sync a common state,
                 the global consensus. It uses a local one, allowing nodes
                 to validate transactions before checking them with every other
@@ -47,12 +49,12 @@ impl Component for Summary {
 
             <p> { "
                 Most blockchains are still using the global consensus method,
-                but AT2's paper demonstrates that this it is unneeded to
-                transfer asset inside a network.
+                but AT2's paper demonstrates that this is unneeded to
+                transfer asset within a network.
                 For the sake of transparency, there is another project based
                 on a similar technology, though not on the same papers, " }
                 <a href="https://www.avax.network/"> { "Avalanche" } </a> { ",
-                which is already used to run Etherium-compatible smart contracts.
+                which is already used to run Ethereum-compatible smart contracts.
                 Currently, AT2 doesn't allow it but " }
                 <a href="https://factory.c4dt.org/showcase/carbon">
                     { "Carbon" }
