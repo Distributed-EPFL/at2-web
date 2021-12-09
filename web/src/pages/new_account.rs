@@ -24,13 +24,20 @@ pub enum Message {
     UserPut(Result<Box<User>, client::Error>),
 }
 
+enum CreateUser {
+    Ready,
+    Updating,
+    Created,
+    Failed(client::Error),
+}
+
 pub struct NewAccount {
     link: ComponentLink<Self>,
     properties: Properties,
 
     client: Client,
 
-    create_user_error: Option<client::Error>,
+    create_user: CreateUser,
 }
 
 impl Component for NewAccount {
@@ -44,7 +51,7 @@ impl Component for NewAccount {
             link,
             properties,
             client: Client::new(conf.name_service()),
-            create_user_error: None,
+            create_user: CreateUser::Ready,
         }
     }
 
@@ -58,20 +65,22 @@ impl Component for NewAccount {
                 let (user, mut client) = (self.properties.user.clone(), self.client.clone());
                 let callback = self.link.callback(Self::Message::UserPut);
 
+                self.create_user = CreateUser::Updating;
+
                 spawn_local(async move {
                     callback.emit(client.put(user.clone()).await.map(|_| Box::new(user)))
                 });
 
-                false
+                true
             }
             Self::Message::UserPut(res) => {
                 match res {
                     Ok(user) => {
                         self.properties.on_new_user.emit(user);
-                        self.create_user_error = None;
+                        self.create_user = CreateUser::Created;
                     }
                     Err(err) => {
-                        self.create_user_error = Some(err);
+                        self.create_user = CreateUser::Failed(err);
                     }
                 }
 
@@ -131,11 +140,20 @@ impl Component for NewAccount {
                         label=if self.properties.user_created { "Update username" } else { "Create user" }
                         raised=true
                     /></span>
+
+                    <span class="material-icons"> {
+                        match &self.create_user {
+                            CreateUser::Ready => "",
+                            CreateUser::Updating => "sync",
+                            CreateUser::Created => "done",
+                            CreateUser::Failed(_) => "clear",
+                        }
+                    } </span>
                 </div>
 
-                { self.create_user_error.as_ref().map(|err| html! {
-                    <p style="color: red"> { format!("error while creating user: {}", err) } </p>
-                }).unwrap_or_else(|| html! {}) }
+                { if let CreateUser::Failed(err) = &self.create_user {
+                    html! { <p style="color: red"> { format!("error while creating user: {}", err) } </p> }
+                } else { html! {} } }
             </div>
 
             <hr />
