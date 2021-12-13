@@ -34,15 +34,19 @@ pub struct SendTransactionDialog {
     get_balance_agent: Box<dyn Bridge<agents::GetBalance>>,
     current_user_balance: Option<u64>,
 
-    amount_to_send: usize,
+    amount_to_send: String,
 }
 
 pub enum Message {
     GotBalance(<agents::GetBalance as Agent>::Output),
-    UpdateAmountToSend(Option<usize>),
+    UpdateAmountToSend(String),
 
     SendTransaction,
     CancelDialog,
+}
+
+fn validate_amount(amount: &str) -> Option<usize> {
+    amount.parse::<usize>().ok()
 }
 
 impl Component for SendTransactionDialog {
@@ -55,24 +59,23 @@ impl Component for SendTransactionDialog {
             props,
             get_balance_agent: agents::GetBalance::bridge(link.callback(Self::Message::GotBalance)),
             current_user_balance: None,
-            amount_to_send: DEFAULT_SEND_TRANSACTION_AMOUNT,
+            amount_to_send: DEFAULT_SEND_TRANSACTION_AMOUNT.to_string(),
         }
     }
 
     fn update(&mut self, message: Self::Message) -> ShouldRender {
         match message {
-            Self::Message::UpdateAmountToSend(parsed_amount) => {
-                if let Some(amount) = parsed_amount {
-                    self.amount_to_send = amount;
-                }
-                false
+            Self::Message::UpdateAmountToSend(amount) => {
+                self.amount_to_send = amount;
+                true
             }
             Self::Message::SendTransaction => {
-                if let Some(recipient) = mem::take(&mut self.props.user) {
-                    self.props.on_send.emit((
-                        recipient,
-                        mem::replace(&mut self.amount_to_send, DEFAULT_SEND_TRANSACTION_AMOUNT),
-                    ));
+                if let Some(amount) = validate_amount(&self.amount_to_send) {
+                    if let Some(recipient) = mem::take(&mut self.props.user) {
+                        self.amount_to_send = DEFAULT_SEND_TRANSACTION_AMOUNT.to_string();
+
+                        self.props.on_send.emit((recipient, amount));
+                    }
                 }
                 true
             }
@@ -142,11 +145,10 @@ impl Component for SendTransactionDialog {
                             label="Amount to send"
                             align_end=true
                         ><input
-                            value=self.amount_to_send.to_string()
+                            value=self.amount_to_send.clone()
                             min=1
-                            oninput=self.link.callback(|event: InputData|
-                                Self::Message::UpdateAmountToSend(event.value.parse().ok())
-                            )
+                            max=self.current_user_balance.unwrap_or(u64::MAX).to_string()
+                            oninput=self.link.callback(|event: InputData| Self::Message::UpdateAmountToSend(event.value))
                             type="number"
                         /></MatFormfield>
                     </MatListItem>
@@ -155,7 +157,10 @@ impl Component for SendTransactionDialog {
                 <MatDialogAction
                     action_type=ActionType::Primary
                     action=Cow::from("send")>
-                    <MatButton label="Send" />
+                    <MatButton
+                        label="Send"
+                        disabled=validate_amount(&self.amount_to_send).is_none()
+                    />
                 </MatDialogAction>
                 <MatDialogAction
                     action_type=ActionType::Secondary
