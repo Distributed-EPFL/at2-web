@@ -49,10 +49,10 @@ impl Component for Summary {
 
             <p> { "
                 Most blockchains are still using the global consensus method,
-                but AT2's paper demonstrates that this is unneeded to
+                but AT2's paper demonstrates that this is unnecessary to
                 transfer asset within a network.
                 For the sake of transparency, there is another project based
-                on a similar technology, though not on the same papers, " }
+                on a similar technology, " }
                 <a href="https://www.avax.network/"> { "Avalanche" } </a> { ",
                 which is already used to run Ethereum-compatible smart contracts.
                 Currently, AT2 doesn't allow it but " }
