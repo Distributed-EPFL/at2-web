@@ -137,7 +137,7 @@ impl Component for NewAccount {
                     <span
                         onclick=self.link.callback(|_| Self::Message::CreateUser)
                     ><MatButton
-                        label=if self.properties.user_created { "Update username" } else { "Create user" }
+                        label=if self.properties.user_created { "Update username" } else { "Confirm username" }
                         raised=true
                     /></span>
 
