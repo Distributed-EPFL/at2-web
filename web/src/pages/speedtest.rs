@@ -354,7 +354,7 @@ impl Speedtest {
 
             <tr>
                 <td style=FIRST_COL> { "Running for" } </td>
-                <td> { format!("{}s", elapsed.num_seconds()) } </td>
+                <td> { format!("{:.1}s", elapsed.num_milliseconds() as f64 / 1000.0) } </td>
             </tr>
 
             <tr>
