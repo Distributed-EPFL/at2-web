@@ -19,6 +19,10 @@ pub struct Properties {
     pub bump_sequence: Callback<sieve::Sequence>,
 }
 
+fn validate_amount(amount: &str) -> Option<usize> {
+    amount.parse::<usize>().ok()
+}
+
 pub struct Speedtest {
     link: ComponentLink<Self>,
     props: Properties,
@@ -30,7 +34,7 @@ pub struct Speedtest {
     sorted_usernames: Vec<String>,
     username_to_user: HashMap<String, Contact>,
 
-    amount: usize,
+    amount: String,
     to_username: Option<String>,
 
     state: State,
@@ -58,7 +62,7 @@ pub enum Message {
     GotUsers(<agents::GetUsers as Agent>::Output),
     GotLastSequence(<agents::GetLastSequence as Agent>::Output),
 
-    UpdateTransactionAmount(Option<usize>),
+    UpdateTransactionAmount(String),
     UpdateUser(String),
 
     Start,
@@ -91,7 +95,7 @@ impl Component for Speedtest {
             sorted_usernames: Vec::new(),
             username_to_user: HashMap::new(),
 
-            amount: 1000,
+            amount: "1000".to_owned(),
             to_username: None,
 
             state: State::Idle,
@@ -158,9 +162,7 @@ impl Component for Speedtest {
             }
 
             Self::Message::UpdateTransactionAmount(amount) => {
-                if let Some(amount) = amount {
-                    self.amount = amount;
-                }
+                self.amount = amount;
                 false
             }
             Self::Message::UpdateUser(username) => {
@@ -169,26 +171,26 @@ impl Component for Speedtest {
             }
 
             Self::Message::Start => {
-                let total_tx = self.amount;
+                if let Some(total_tx) = validate_amount(&self.amount) {
+                    self.state = State::Started {
+                        started_at: Local::now(),
+                        sent_tx: 0,
+                        confirmed_tx: 0,
+                        total_tx,
+                    };
 
-                self.state = State::Started {
-                    started_at: Local::now(),
-                    sent_tx: 0,
-                    confirmed_tx: 0,
-                    total_tx,
-                };
+                    let users_to_send_to = self
+                        .to_username
+                        .as_ref()
+                        .and_then(|username| self.username_to_user.get(username))
+                        .map(|user| vec![user.clone()])
+                        .unwrap_or_else(|| self.username_to_user.values().cloned().collect());
 
-                let users_to_send_to = self
-                    .to_username
-                    .as_ref()
-                    .and_then(|username| self.username_to_user.get(username))
-                    .map(|user| vec![user.clone()])
-                    .unwrap_or_else(|| self.username_to_user.values().cloned().collect());
-
-                self.link.send_message(Self::Message::Running {
-                    users_to_send_to,
-                    remaining: total_tx,
-                });
+                    self.link.send_message(Self::Message::Running {
+                        users_to_send_to,
+                        remaining: total_tx,
+                    });
+                }
 
                 true
             }
@@ -263,8 +265,8 @@ impl Component for Speedtest {
                     <MatFormfield label="How many transactions to send" align_end=true>
                         <input
                             oninput=self.link.callback(|event: InputData|
-                                Self::Message::UpdateTransactionAmount(event.value.parse().ok()))
-                            value=self.amount.to_string()
+                                Self::Message::UpdateTransactionAmount(event.value))
+                            value=self.amount.clone()
                             min=1
                             type={ "number" }
                         />
@@ -293,7 +295,7 @@ impl Component for Speedtest {
                     ><MatButton
                         label="Launch"
                         raised=true
-                        disabled=matches!(self.state, State::Started { .. })
+                        disabled=matches!(self.state, State::Started { .. }) || validate_amount(&self.amount).is_none()
                     /></span>
                 </MatListItem>
             </MatList>
