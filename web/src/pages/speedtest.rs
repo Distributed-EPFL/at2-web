@@ -246,9 +246,9 @@ impl Component for Speedtest {
             <p> { "
                 One of the most interesting features of AT2 is that it allows
                 for many more transactions per second (TPS) than the most
-                popular blockchains.
+                popular blockchains, such as Bitcoin or Ethereum.
                 Here you can actually test it, flooding the servers with
-                transactions.
+                transactions, and see how well it compares to the two.
             " } <br /> { "
                 Bear in mind that the transactions are sent by your browser to
                 a node, which then forwards them to the actual network.
