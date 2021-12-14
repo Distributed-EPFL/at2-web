@@ -233,17 +233,17 @@ impl Component for YourAccount {
                       "border-bottom: 1px solid;",
                       "border-top: 1px solid;",
                   )>
-                      <td>{ HumanTime::from(tx.timestamp - now) }</td>
-                      <td>{ match tx.state {
+                      <td style="padding: 0 2px;">{ HumanTime::from(tx.timestamp - now) }</td>
+                      <td style="padding: 0 2px;">{ match tx.state {
                           TransactionState::Pending => html! { <span style="color: grey">{ "pending" }</span> },
                           TransactionState::Success => html! { "success" },
                           TransactionState::Failure => html! { <span style="color: violet">{ "failure" }</span> },
                       }}</td>
-                      <td>
+                      <td style="padding: 0 2px;">
                         { self.pubkey_to_username.get(&tx.sender).unwrap_or(&tx.sender.to_string()) }
                         { " -> " }
                         { self.pubkey_to_username.get(&tx.recipient).unwrap_or(&tx.recipient.to_string()) }</td>
-                      <td>{ tx.amount } { "💶" }</td>
+                      <td style="padding: 0 2px;">{ tx.amount } { "💶" }</td>
                   </tr>
                 }) }
             </table>
