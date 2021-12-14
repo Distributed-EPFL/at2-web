@@ -170,6 +170,21 @@ impl Component for YourAccount {
                 someone else is running a speedtest.
             " } </p>
 
+            <p> { "
+                One of the specificity of AT2 is that there isn't a regular
+                synchronisation of the network.
+                So when one is sending a transaction that debits more than one
+                have, we can't really say it's invalid. There might be
+                another transaction crediting this account that is still
+                spreading throughout the network. So it will stay in a pending
+                state until the network remove it.
+            " } <br /> { "
+                But sending wrong transactions is punitive here, if you send
+                one, the network will kick you out. In the protocol itself, it
+                will be seen as trying to double spend.
+                Please don't, or wait a minute before retrying.
+            " } </p>
+
             <hr />
 
             <h2> { "Addressbook" } </h2>
