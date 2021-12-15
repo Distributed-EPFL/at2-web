@@ -10,17 +10,15 @@ use std::cmp::min;
 use at2_node::client;
 use at2_ns::User;
 use drop::crypto::sign;
+use gloo_storage::LocalStorage;
 use material_yew::MatButton;
 use new_account::NewAccount;
 use speedtest::Speedtest;
 pub use style::Style;
 use summary::Summary;
 use welcome::Welcome;
-use yew::{
-    format::Json,
-    prelude::*,
-    services::storage::{Area, StorageService},
-};
+use yew::prelude::*;
+use yew_agent::Bridge;
 use your_account::YourAccount;
 
 use crate::agents;
@@ -39,7 +37,6 @@ const STORAGE_KEY: &str = "at2-user";
 
 /// Component showing the pages
 pub struct Pages {
-    link: ComponentLink<Self>,
     index: usize,
 
     user: (User, sieve::Sequence),
@@ -52,13 +49,11 @@ impl Component for Pages {
     type Properties = ();
     type Message = Message;
 
-    fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(ctx: Context<Self>) -> Self {
         let mut get_last_sequence_agent =
-            agents::GetLastSequence::bridge(link.callback(Self::Message::SequenceMightBump));
+            agents::GetLastSequence::bridge(ctx.link().callback(Self::Message::SequenceMightBump));
 
-        let (user, user_created) = if let Ok(Json(Ok(stored))) =
-            StorageService::new(Area::Local).map(|storage| storage.restore::<Json<_>>(STORAGE_KEY))
-        {
+        let (user, user_created) = if let Ok(stored) = LocalStorage::get(STORAGE_KEY) {
             let (user, seq): (User, sieve::Sequence) = stored;
             get_last_sequence_agent.send(user.clone().to_thin());
 
@@ -77,8 +72,7 @@ impl Component for Pages {
         };
 
         Self {
-            link,
-            index: 0,
+            index: 2,
 
             user,
             user_created,
@@ -87,7 +81,7 @@ impl Component for Pages {
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, msg: Self::Message) -> bool {
         match msg {
             Self::Message::PreviousPage => {
                 self.index = self.index.saturating_sub(1);
@@ -101,9 +95,7 @@ impl Component for Pages {
                 self.user.0 = *user;
                 self.user_created = true;
 
-                if let Ok(mut storage) = StorageService::new(Area::Local) {
-                    storage.store(STORAGE_KEY, Json(&self.user));
-                };
+                LocalStorage.set(STORAGE_KEY, &self.user);
 
                 true
             }
@@ -120,17 +112,11 @@ impl Component for Pages {
             Self::Message::SequenceBumped(seq) => {
                 self.user.1 = seq;
 
-                if let Ok(mut storage) = StorageService::new(Area::Local) {
-                    storage.store(STORAGE_KEY, Json(&self.user));
-                };
+                LocalStorage.set(STORAGE_KEY, &self.user);
 
                 true
             }
         }
-    }
-
-    fn change(&mut self, _: Self::Properties) -> ShouldRender {
-        false
     }
 
     fn view(&self) -> Html {
@@ -179,48 +165,47 @@ impl Component for Pages {
             }
             " } </style>
 
-            <div class=classes!("page") hidden=self.index != 0>
+            <div class="page" hidden={ self.index != 0 }>
                 <Welcome/>
             </div>
-            <div class=classes!("page") hidden=self.index != 1>
+            <div class="page" hidden={ self.index != 1 }>
                 <NewAccount
-                    on_new_user=self.link.callback(Self::Message::UserCreated)
-                    user=self.user.0.clone()
-                    user_created=self.user_created
+                    on_new_user={ self.link.callback(Self::Message::UserCreated) }
+                    user={ self.user.0.clone() }
+                    user_created={ self.user_created }
                 />
             </div>
-            <div class=classes!("page") hidden=self.index != 2>
+            <div class="page" hidden={ self.index != 2 }>
                  <YourAccount
-                    user=self.user.clone()
-                    bump_sequence=self.link.callback(Self::Message::SequenceBumped)
+                    user={ self.user.clone() }
+                    bump_sequence={ self.link.callback(Self::Message::SequenceBumped) }
                 />
             </div>
-            <div class=classes!("page") hidden=self.index != 3>
+            <div class="page" hidden={ self.index != 3 }>
                 <Speedtest
-                    user=self.user.clone()
-                    bump_sequence=self.link.callback(Self::Message::SequenceBumped)
+                    user={ self.user.clone() }
+                    bump_sequence={ self.link.callback(Self::Message::SequenceBumped) }
                 />
             </div>
-            <div class=classes!("page") hidden=self.index != 4>
+            <div class="page" hidden={ self.index != 4 }>
                 <Summary/>
             </div>
 
-            <div class=classes!("bottom")>
+            <div class="bottom">
                 <div>
-                    <span onclick=self.link.callback(|_| Self::Message::PreviousPage)>
+                    <span onclick={ self.link.callback(|_| Self::Message::PreviousPage) }>
                         <MatButton
                             label="Previous"
                             raised=true
-                            disabled=self.index == 0
+                            disabled={ self.index == 0 }
                         />
                     </span>
                     <span>{ format!("{}/{}", self.index + 1, PAGE_COUNT) }</span>
-                    <span onclick=self.link.callback(|_| Self::Message::NextPage)>
+                    <span onclick={ self.link.callback(|_| Self::Message::NextPage) }>
                         <MatButton
                             label="Next"
                             raised=true
-                            disabled=
-                                self.index+1 == PAGE_COUNT || (self.index == 1 && !self.user_created)
+                            disabled={ self.index+1 == PAGE_COUNT || (self.index == 1 && !self.user_created) }
                         />
                     </span>
                 </div>

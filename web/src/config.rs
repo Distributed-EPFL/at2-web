@@ -2,8 +2,8 @@
 
 use http::Uri;
 
-const NAME_SERVICE_URI: &str = "https://factory.c4dt.org/incubator/at2/demo/ns";
-const NETWORK_URI: &str = "https://factory.c4dt.org/incubator/at2/demo/leader";
+const NAME_SERVICE_URI: &str = "http://127.0.0.1:2000";
+const NETWORK_URI: &str = "http://127.0.0.1:1025";
 
 pub struct Config {
     name_service: Uri,

@@ -1,7 +1,7 @@
 use at2_node::client::{self, Client};
-use at2_ns::{User, Contact};
+use at2_ns::{Contact, User};
 use wasm_bindgen_futures::spawn_local;
-use yew::worker::*;
+use yew_agent::{Agent, AgentLink, Context, HandlerId};
 
 use crate::config::Config;
 

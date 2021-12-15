@@ -32,7 +32,6 @@ enum CreateUser {
 }
 
 pub struct NewAccount {
-    link: ComponentLink<Self>,
     properties: Properties,
 
     client: Client,
@@ -44,18 +43,17 @@ impl Component for NewAccount {
     type Properties = Properties;
     type Message = Message;
 
-    fn create(properties: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(ctx: Context<Self>) -> Self {
         let conf = Config::parse();
 
         Self {
-            link,
-            properties,
+            properties: ctx.props(),
             client: Client::new(conf.name_service()),
             create_user: CreateUser::Ready,
         }
     }
 
-    fn update(&mut self, message: Self::Message) -> ShouldRender {
+    fn update(&mut self, message: Self::Message) -> bool {
         match message {
             Self::Message::SetUsername(username) => {
                 self.properties.user.name = username;
@@ -89,10 +87,10 @@ impl Component for NewAccount {
         }
     }
 
-    fn change(&mut self, properties: Self::Properties) -> ShouldRender {
-        let ret = properties != self.properties;
+    fn changed(&mut self, ctx: Context<Self>) -> bool {
+        let ret = ctx.props() != self.properties;
 
-        self.properties = properties;
+        self.properties = ctx.props();
 
         ret
     }
@@ -114,30 +112,26 @@ impl Component for NewAccount {
 
             <hr />
 
-            <div style=concat!(
-                "display: flex;",
-                "flex-direction: column;",
-            )>
+            <div style="display: flex; flex-direction: column;">
                 { if !self.properties.user_created { html! { <p> {
                     "We generate a username for you, feel free to change it."
                 } </p> } } else { html! {} } }
 
-                <div style=concat!(
+                <div style={ concat!(
                     "display: flex;",
                     "justify-content: space-around;",
                     "align-items: center;",
-                )>
+                ) }>
                     <MatTextField
                         label="Enter your username"
-                        oninput=self.link.callback(|event: InputData|
-                            Self::Message::SetUsername(event.value))
-                        value=self.properties.user.name.clone()
+                        oninput={ self.link.callback(|event| Self::Message::SetUsername(event.value)) }
+                        value={ self.properties.user.name.clone() }
                     />
 
                     <span
-                        onclick=self.link.callback(|_| Self::Message::CreateUser)
+                        onclick={ self.link.callback(|_| Self::Message::CreateUser) }
                     ><MatButton
-                        label=if self.properties.user_created { "Update username" } else { "Confirm username" }
+                        label={ if self.properties.user_created { "Update username" } else { "Confirm username" } }
                         raised=true
                     /></span>
 
@@ -196,7 +190,7 @@ impl Component for NewAccount {
             " } </style>
 
 
-            <div class=classes!("boxes")>
+            <div class="boxes">
                 <p> { "C4DT" } </p>
                 <p> { "DCL" } </p>
                 <p> { "ineiti" } </p>

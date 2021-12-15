@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use at2_node::{client::Client, FullTransaction};
 use gloo_timers::callback::Interval;
 use wasm_bindgen_futures::spawn_local;
-use yew::{services::ConsoleService, worker::*};
+use yew_agent::{Agent, AgentLink, Context, HandlerId};
 
 use crate::config::Config;
 
@@ -36,11 +36,8 @@ impl Agent for GetLatestTransactions {
                 let (mut client, update_txs) = (client.clone(), update_txs.clone());
 
                 spawn_local(async move {
-                    match client.get_latest_transactions().await {
-                        Ok(users) => update_txs.emit(users),
-                        Err(err) => {
-                            ConsoleService::error(&format!("unable to refresh users: {}", err))
-                        }
+                    if let Ok(users) = client.get_latest_transactions().await {
+                        update_txs.emit(users);
                     }
                 });
             }),

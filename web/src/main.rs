@@ -8,31 +8,13 @@ fn main() {
     yew::start_app::<App>();
 }
 
-struct App;
+#[function_component(App)]
+fn app() -> Html {
+    html! { <>
+        <style> { include_str!(concat!(env!("OUT_DIR"), "/c4dt.css")) } </style>
 
-impl Component for App {
-    type Properties = ();
-    type Message = ();
+        <pages::Style/>
 
-    fn create(_: Self::Properties, _: ComponentLink<Self>) -> Self {
-        Self
-    }
-
-    fn update(&mut self, _: Self::Message) -> ShouldRender {
-        false
-    }
-
-    fn change(&mut self, _: Self::Properties) -> ShouldRender {
-        false
-    }
-
-    fn view(&self) -> Html {
-        html! { <>
-            <style> { include_str!(concat!(env!("OUT_DIR"), "/c4dt.css")) } </style>
-
-            <pages::Style/>
-
-            <pages::Pages/>
-        </> }
-    }
+        <pages::Pages/>
+    </> }
 }

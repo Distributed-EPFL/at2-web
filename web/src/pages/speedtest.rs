@@ -105,7 +105,7 @@ impl Component for Speedtest {
         }
     }
 
-    fn update(&mut self, message: Self::Message) -> ShouldRender {
+    fn update(&mut self, message: Self::Message) -> bool {
         match message {
             Self::Message::TransactionSent(_) => {
                 if let State::Started { sent_tx, .. } = &mut self.state {
@@ -234,7 +234,7 @@ impl Component for Speedtest {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
+    fn change(&mut self, props: Self::Properties) -> bool {
         self.props = props;
         false
     }

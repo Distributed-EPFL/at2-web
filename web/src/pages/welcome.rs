@@ -10,11 +10,11 @@ impl Component for Welcome {
         Self
     }
 
-    fn update(&mut self, _: Self::Message) -> ShouldRender {
+    fn update(&mut self, _: Self::Message) -> bool {
         false
     }
 
-    fn change(&mut self, _: Self::Properties) -> ShouldRender {
+    fn change(&mut self, _: Self::Properties) -> bool {
         false
     }
 

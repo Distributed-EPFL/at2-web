@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use at2_ns::{client::Client, Contact};
 use gloo_timers::callback::Interval;
 use wasm_bindgen_futures::spawn_local;
-use yew::{services::ConsoleService, worker::*};
+use yew_agent::{Agent, AgentLink, Context, HandlerId};
 
 use crate::config::Config;
 
@@ -36,11 +36,8 @@ impl Agent for GetUsers {
                 let (mut client, update_users) = (client.clone(), update_users.clone());
 
                 spawn_local(async move {
-                    match client.get_all().await {
-                        Ok(users) => update_users.emit(users),
-                        Err(err) => {
-                            ConsoleService::error(&format!("unable to refresh users: {}", err))
-                        }
+                    if let Ok(users) = client.get_all().await {
+                        update_users.emit(users);
                     }
                 });
             }),

@@ -63,7 +63,7 @@ impl Component for SendTransactionDialog {
         }
     }
 
-    fn update(&mut self, message: Self::Message) -> ShouldRender {
+    fn update(&mut self, message: Self::Message) -> bool {
         match message {
             Self::Message::UpdateAmountToSend(amount) => {
                 self.amount_to_send = amount;
@@ -98,7 +98,7 @@ impl Component for SendTransactionDialog {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
+    fn change(&mut self, props: Self::Properties) -> bool {
         if self.props == props {
             return false;
         }
