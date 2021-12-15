@@ -41,12 +41,16 @@ pub struct YourAccount {
     dialog_user: Option<Contact>,
 
     latest_transactions: Vec<FullTransaction>,
+
+    get_balance_agent: Box<dyn Bridge<agents::GetBalance>>,
+    user_balance: Option<u64>,
 }
 
 pub enum Message {
     GotUsers(<agents::GetUsers as Agent>::Output),
     TransactionSent(<agents::SendAsset as Agent>::Output),
     LatestTransactionsGot(<agents::GetLatestTransactions as Agent>::Output),
+    GotBalance(<agents::GetBalance as Agent>::Output),
 
     ClickUser(Option<String>),
     SendTransaction((Contact, usize)),
@@ -64,6 +68,10 @@ impl Component for YourAccount {
             link.callback(Self::Message::LatestTransactionsGot),
         );
 
+        let mut get_balance_agent =
+            agents::GetBalance::bridge(link.callback(Self::Message::GotBalance));
+        get_balance_agent.send(props.user.0.clone().to_thin());
+
         Self {
             link,
             props,
@@ -71,6 +79,7 @@ impl Component for YourAccount {
             get_users_agent,
             send_asset_agent,
             get_latest_transactions_agent,
+
             sorted_usernames: Vec::new(),
             username_to_user: HashMap::new(),
             pubkey_to_username: HashMap::new(),
@@ -79,6 +88,9 @@ impl Component for YourAccount {
             dialog_user: None,
 
             latest_transactions: Vec::new(),
+
+            get_balance_agent,
+            user_balance: None,
         }
     }
 
@@ -131,6 +143,9 @@ impl Component for YourAccount {
                     ConsoleService::error(&format!("unable to fit {} in u64", amount));
                 }
 
+                self.get_balance_agent
+                    .send(self.props.user.0.clone().to_thin());
+
                 false
             }
             Self::Message::TransactionSent(ret) => {
@@ -141,6 +156,15 @@ impl Component for YourAccount {
                 latest_transactions.reverse();
                 self.latest_transactions = latest_transactions;
                 true
+            }
+            Self::Message::GotBalance(res) => {
+                match res {
+                    Ok(balance) => self.user_balance = Some(balance),
+                    Err(_) => self
+                        .get_balance_agent
+                        .send(self.props.user.0.clone().to_thin()),
+                }
+                false
             }
         }
     }
@@ -168,21 +192,6 @@ impl Component for YourAccount {
                 recent on top.
                 If you see it changing rapidly, that's probably because
                 someone else is running a speedtest.
-            " } </p>
-
-            <p> { "
-                One of the specificity of AT2 is that there isn't a regular
-                synchronisation of the network.
-                So when one is sending a transaction that debits more than one
-                have, we can't really say it's invalid. There might be
-                another transaction crediting this account that is still
-                spreading throughout the network. So it will stay in a pending
-                state until the network remove it.
-            " } <br /> { "
-                But sending wrong transactions is punitive here, if you send
-                one, the network will kick you out. In the protocol itself, it
-                will be seen as trying to double spend.
-                Please don't, or wait a minute before retrying.
             " } </p>
 
             <hr />
@@ -218,6 +227,7 @@ impl Component for YourAccount {
                 dialog_link=self.dialog_link.clone()
                 user=self.dialog_user.clone()
                 on_send=self.link.callback(Self::Message::SendTransaction)
+                max_amount=self.user_balance
             />
 
             <hr />
