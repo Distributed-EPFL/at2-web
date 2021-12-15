@@ -21,6 +21,7 @@ names = "0.12"
 rand = "0.8"
 snafu = "0.6"
 wasm-bindgen-futures = "0.4"
+web-sys = "0.3"
 yew = "0.19"
 yew-agent = "0.1"
 [dependencies.material-yew]

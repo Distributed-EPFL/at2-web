@@ -5,13 +5,15 @@ use chrono::{offset::Local, DateTime, Duration};
 use gloo_timers::callback::{Interval, Timeout};
 use material_yew::{MatButton, MatFormfield, MatLinearProgress, MatList, MatListItem};
 use rand::{seq::SliceRandom, thread_rng};
-use yew::{prelude::*, services::ConsoleService, worker::Agent};
+use web_sys::InputEvent;
+use yew::prelude::*;
+use yew_agent::{Agent, Bridge};
 
 use crate::agents;
 
 const TRANSFER_PER_REFRESH: usize = 50;
 
-#[derive(Properties, Clone)]
+#[derive(Properties, Clone, PartialEq)]
 pub struct Properties {
     /// User's account
     pub user: (User, sieve::Sequence),
@@ -24,7 +26,6 @@ fn validate_amount(amount: &str) -> Option<usize> {
 }
 
 pub struct Speedtest {
-    link: ComponentLink<Self>,
     props: Properties,
 
     #[allow(dead_code)] // never dropped
@@ -76,18 +77,17 @@ impl Component for Speedtest {
     type Properties = Properties;
     type Message = Message;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let users_agent = agents::GetUsers::bridge(link.callback(Self::Message::GotUsers));
+    fn create(ctx: Context<Self>) -> Self {
+        let users_agent = agents::GetUsers::bridge(ctx.link().callback(Self::Message::GotUsers));
         let send_asset_agent =
-            agents::SendAsset::bridge(link.callback(Self::Message::TransactionSent));
+            agents::SendAsset::bridge(ctx.link().callback(Self::Message::TransactionSent));
 
-        let user = props.user.0.clone().to_thin();
+        let user = ctx.props().user.0.clone().to_thin();
         let mut get_last_sequence_agent =
-            agents::GetLastSequence::bridge(link.callback(Self::Message::GotLastSequence));
+            agents::GetLastSequence::bridge(ctx.link().callback(Self::Message::GotLastSequence));
 
         Self {
-            link,
-            props,
+            props: ctx.props(),
 
             users_agent,
             send_asset_agent,
@@ -142,10 +142,6 @@ impl Component for Speedtest {
                 } = &mut self.state
                 {
                     if let Ok(seq) = ret {
-                        ConsoleService::info(&format!(
-                            "got last sequence: confirmed_tx={} seq={} base_seq={}",
-                            confirmed_tx, seq, self.props.user.1
-                        ));
                         *confirmed_tx = (seq - self.props.user.1) as usize;
 
                         if confirmed_tx == total_tx {
@@ -234,8 +230,8 @@ impl Component for Speedtest {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> bool {
-        self.props = props;
+    fn changed(&mut self, ctx: Context<Self>) -> bool {
+        self.props = ctx.props();
         false
     }
 
@@ -264,38 +260,40 @@ impl Component for Speedtest {
                 <MatListItem>
                     <MatFormfield label="How many transactions to send" align_end=true>
                         <input
-                            oninput=self.link.callback(|event: InputData|
-                                Self::Message::UpdateTransactionAmount(event.value))
-                            value=self.amount.clone()
+                            oninput={ self.link.callback(|event: InputEvent|
+                                Self::Message::UpdateTransactionAmount(event.value)) }
+                            value={ self.amount.clone() }
                             min=1
-                            type={ "number" }
+                            type="number"
                         />
                     </MatFormfield>
                 </MatListItem>
 
                 <MatListItem>
                     <MatFormfield label="To whom to send to" align_end=true>
+                        /* TODO use mat select
                         <select
-                            onchange=self.link.callback(|event: ChangeData| match event {
+                            onchange={ self.link.callback(|event: Event| match event {
                                 ChangeData::Select(elem) => Self::Message::UpdateUser(elem.value()),
                                 _ => unreachable!(),
-                            })
+                            }) }
                         >
                             <option>{ "Anyone" }</option>
                             { for self.sorted_usernames.iter().map(|username| html! {
                                 <option>{ username.clone() }</option>
                             }) }
                         </select>
+                        */
                     </MatFormfield>
                 </MatListItem>
 
                 <MatListItem>
                     <span
-                        onclick=self.link.callback(|_| Self::Message::Start)
+                        onclick={ self.link.callback(|_| Self::Message::Start) }
                     ><MatButton
                         label="Launch"
                         raised=true
-                        disabled=matches!(self.state, State::Started { .. }) || validate_amount(&self.amount).is_none()
+                        disabled={ matches!(self.state, State::Started { .. }) || validate_amount(&self.amount).is_none() }
                     /></span>
                 </MatListItem>
             </MatList>
@@ -328,7 +326,7 @@ impl Speedtest {
                 <MatLinearProgress
                     buffer=1.0
                     reverse=true
-                    progress=2.0 - 2.0*progress
+                    progress={ 2.0 - 2.0*progress }
                 />
             </span>
         }
@@ -346,29 +344,29 @@ impl Speedtest {
 
         html! { <table>
             <tr>
-                <td style=FIRST_COL> { "Transactions sent" } </td>
+                <td style={ FIRST_COL }> { "Transactions sent" } </td>
                 <td> { Speedtest::progress_bar(sent_tx as f32/total_tx as f32) } </td>
             </tr>
             <tr>
-                <td style=FIRST_COL> { "Transactions confirmed" } </td>
+                <td style={ FIRST_COL }> { "Transactions confirmed" } </td>
                 <td> { Speedtest::progress_bar(confirmed_tx as f32/total_tx as f32) } </td>
             </tr>
 
             <tr>
-                <td style=FIRST_COL> { "Running for" } </td>
+                <td style={ FIRST_COL }> { "Running for" } </td>
                 <td> { format!("{:.1}s", elapsed.num_milliseconds() as f64 / 1000.0) } </td>
             </tr>
 
             <tr>
-                <td style=FIRST_COL> { "AT2's computed TPS" } </td>
+                <td style={ FIRST_COL }> { "AT2's computed TPS" } </td>
                 <td> { tps.unwrap_or(0) } </td>
             </tr>
             <tr>
-                <td style=FIRST_COL> { "Bitcoin's TPS" } </td>
+                <td style={ FIRST_COL }> { "Bitcoin's TPS" } </td>
                 <td> { 7 } </td>
             </tr>
             <tr>
-                <td style=FIRST_COL> { "Ethereum's TPS" } </td>
+                <td style={ FIRST_COL }> { "Ethereum's TPS" } </td>
                 <td> { 25 } </td>
             </tr>
         </table> }

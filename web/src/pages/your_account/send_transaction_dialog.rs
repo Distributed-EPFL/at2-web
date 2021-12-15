@@ -5,7 +5,8 @@ use material_yew::{
     dialog::{ActionType, MatDialogAction},
     MatButton, MatDialog, MatFormfield, MatList, MatListItem, WeakComponentLink,
 };
-use yew::{prelude::*, worker::Agent};
+use yew::prelude::*;
+use yew_agent::{Agent, Bridge};
 
 const DEFAULT_SEND_TRANSACTION_AMOUNT: usize = 3;
 
@@ -26,8 +27,6 @@ pub struct Properties {
 }
 
 pub struct SendTransactionDialog {
-    link: ComponentLink<Self>,
-
     props: Properties,
 
     #[allow(dead_code)] // dropped on close
@@ -53,11 +52,12 @@ impl Component for SendTransactionDialog {
     type Properties = Properties;
     type Message = Message;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(ctx: Context<Self>) -> Self {
         Self {
-            link: link.clone(),
-            props,
-            get_balance_agent: agents::GetBalance::bridge(link.callback(Self::Message::GotBalance)),
+            props: ctx.props(),
+            get_balance_agent: agents::GetBalance::bridge(
+                ctx.link().callback(Self::Message::GotBalance),
+            ),
             current_user_balance: None,
             amount_to_send: DEFAULT_SEND_TRANSACTION_AMOUNT.to_string(),
         }
@@ -98,12 +98,12 @@ impl Component for SendTransactionDialog {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> bool {
-        if self.props == props {
+    fn changed(&mut self, ctx: Context<Self>) -> bool {
+        if self.props == ctx.props() {
             return false;
         }
 
-        self.props = props;
+        self.props = ctx.props();
 
         if let Some(user) = self.props.user.clone() {
             self.get_balance_agent.send(user);
@@ -115,12 +115,12 @@ impl Component for SendTransactionDialog {
     fn view(&self) -> Html {
         html! {
             <MatDialog
-                heading=self.props.user.as_ref().map(|user| Cow::from(user.name.clone()))
-                dialog_link=self.props.dialog_link.clone()
-                onclosed=self.link.callback(|action: String| match action.as_str() {
+                heading={ self.props.user.as_ref().map(|user| Cow::from(user.name.clone())) }
+                dialog_link={ self.props.dialog_link.clone() }
+                onclosed={ self.link.callback(|action: String| match action.as_str() {
                     "send" => Self::Message::SendTransaction,
                     _ => Self::Message::CancelDialog,
-                })
+                }) }
             >
                 <MatList >
                     <MatListItem>
@@ -145,26 +145,26 @@ impl Component for SendTransactionDialog {
                             label="Amount to send"
                             align_end=true
                         ><input
-                            value=self.amount_to_send.clone()
+                            value={ self.amount_to_send.clone() }
                             min=1
-                            max=self.current_user_balance.unwrap_or(u64::MAX).to_string()
-                            oninput=self.link.callback(|event: InputData| Self::Message::UpdateAmountToSend(event.value))
+                            max={ self.current_user_balance.unwrap_or(u64::MAX).to_string() }
+                            oninput={ self.link.callback(|event| Self::Message::UpdateAmountToSend(event.value)) }
                             type="number"
                         /></MatFormfield>
                     </MatListItem>
                 </MatList>
 
                 <MatDialogAction
-                    action_type=ActionType::Primary
-                    action=Cow::from("send")>
+                    action_type={ ActionType::Primary }
+                    action={ Cow::from("send") }>
                     <MatButton
                         label="Send"
-                        disabled=validate_amount(&self.amount_to_send).is_none()
+                        disabled={ validate_amount(&self.amount_to_send).is_none() }
                     />
                 </MatDialogAction>
                 <MatDialogAction
-                    action_type=ActionType::Secondary
-                    action=Cow::from("cancel")>
+                    action_type={ ActionType::Secondary }
+                    action={ Cow::from("cancel") }>
                     <MatButton label="Cancel" />
                 </MatDialogAction>
             </MatDialog>

@@ -1,32 +1,15 @@
 use yew::prelude::*;
 
-pub struct Welcome;
+#[function_component(Welcome)]
+pub fn welcome() -> Html {
+    html! { <>
+        <h1> { "Welcome to AT2" } </h1>
 
-impl Component for Welcome {
-    type Properties = ();
-    type Message = ();
-
-    fn create(_: Self::Properties, _: ComponentLink<Self>) -> Self {
-        Self
-    }
-
-    fn update(&mut self, _: Self::Message) -> bool {
-        false
-    }
-
-    fn change(&mut self, _: Self::Properties) -> bool {
-        false
-    }
-
-    fn view(&self) -> Html {
-        html! { <>
-            <h1> { "Welcome to AT2" } </h1>
-
-            <p>
-                <a href="https://factory.c4dt.org/showcase/at2"> { "AT2" } </a>
-                { " is a research project developed at Prof. Rachid Guerraoui's " }
-                <a href="https://dcl.epfl.ch"> { "Distributed Computing Lab" } </a>
-                { ", at EPFL.
+        <p>
+            <a href="https://factory.c4dt.org/showcase/at2"> { "AT2" } </a>
+            { " is a research project developed at Prof. Rachid Guerraoui's " }
+            <a href="https://dcl.epfl.ch"> { "Distributed Computing Lab" } </a>
+            { ", at EPFL.
                 It stands for Asynchronous Trustworthy Transfer, it is a
                 new way to transfer assets (such as coins) throughout a
                 network of potentially rogue participants.
@@ -42,7 +25,7 @@ impl Component for Welcome {
                 correct ordering is.
             " } </p>
 
-            <p> { "
+        <p> { "
                 This demonstrator will take you through a classic account
                 creation as you would do on another blockchain, but there
                 is a twist at the end.
@@ -54,6 +37,5 @@ impl Component for Welcome {
                 speed test where you can send as many transactions as you
                 want and measure how well the network is handling the load.
             " } </p>
-        </> }
-    }
+    </> }
 }

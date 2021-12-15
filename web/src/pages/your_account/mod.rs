@@ -16,7 +16,7 @@ use crate::agents;
 mod send_transaction_dialog;
 use send_transaction_dialog::SendTransactionDialog;
 
-#[derive(Properties, Clone)]
+#[derive(Properties, Clone, PartialEq)]
 pub struct Properties {
     /// User's account
     pub user: (User, sieve::Sequence),
