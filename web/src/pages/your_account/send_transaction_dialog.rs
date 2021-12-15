@@ -21,6 +21,9 @@ pub struct Properties {
     /// Link to the MatDialog
     pub dialog_link: WeakComponentLink<MatDialog>,
 
+    /// Maximum amount
+    pub max_amount: Option<u64>,
+
     /// Where to send the transaction
     pub on_send: Callback<(Contact, usize)>,
 }
@@ -45,8 +48,16 @@ pub enum Message {
     CancelDialog,
 }
 
-fn validate_amount(amount: &str) -> Option<usize> {
-    amount.parse::<usize>().ok()
+fn validate_amount(max: &Option<u64>, amount: &str) -> Option<usize> {
+    let amount = amount.parse::<usize>().ok()?;
+
+    if let Some(max) = max {
+        if amount > *max as usize {
+            return None;
+        }
+    }
+
+    Some(amount)
 }
 
 impl Component for SendTransactionDialog {
@@ -70,7 +81,8 @@ impl Component for SendTransactionDialog {
                 true
             }
             Self::Message::SendTransaction => {
-                if let Some(amount) = validate_amount(&self.amount_to_send) {
+                if let Some(amount) = validate_amount(&self.props.max_amount, &self.amount_to_send)
+                {
                     if let Some(recipient) = mem::take(&mut self.props.user) {
                         self.amount_to_send = DEFAULT_SEND_TRANSACTION_AMOUNT.to_string();
 
@@ -159,7 +171,7 @@ impl Component for SendTransactionDialog {
                     action=Cow::from("send")>
                     <MatButton
                         label="Send"
-                        disabled=validate_amount(&self.amount_to_send).is_none()
+                        disabled=validate_amount(&self.props.max_amount, &self.amount_to_send).is_none()
                     />
                 </MatDialogAction>
                 <MatDialogAction
