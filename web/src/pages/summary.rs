@@ -27,8 +27,9 @@ impl Component for Summary {
                 You can send asset with it, see other users on the network
                 and see the latest processed transactions.
                 But using a speedtest really uncovers the true power of AT2:
-                it is faster than other most popular blockchains, beating
-                Bitcoin and " }
+                it is faster than other most popular blockchains, beating " }
+                <a href="https://bitcoin.org"> { "Bitcoin" } </a>
+                { " and " }
                 <a href="https://ethereum.org"> { "Ethereum" } </a>
                 { " by a factor of 10.
                 It achieves that speed by avoiding to sync a common state,
