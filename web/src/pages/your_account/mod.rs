@@ -182,17 +182,22 @@ impl Component for YourAccount {
 
             <p> { "
                 Now, your account is registered on the chain.
-                As with BitCoin, you have a wallet, which is already populated.
+                Same as Bitcoin, you have a wallet, to which we added 100'000
+                assets.
             " } <br /> { "
-                Below, you can play by sending some asset to the other members
+                Below, you can play by sending some asset to the other accounts
                 of the network. Click on any name, send some asset and see your
                 transaction being validated.
             " } <br /> { "
-                The most recent transactions will appear below, with the most
-                recent on top.
+                The ten most recent transactions on the network will appear
+                below, with the most recent on top.
                 If you see it changing rapidly, that's probably because
                 someone else is running a speedtest.
-            " } </p>
+            " } <br /> { "
+                If you don't see your transactions, or that one fails, please " }
+                <a href="mailto:factory@c4dt.org"> { "contact the C4DT" } </a>
+                { "." }
+            </p>
 
             <hr />
 
