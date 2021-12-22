@@ -258,7 +258,7 @@ impl Component for YourAccount {
                         { self.pubkey_to_username.get(&tx.sender).unwrap_or(&tx.sender.to_string()) }
                         { " -> " }
                         { self.pubkey_to_username.get(&tx.recipient).unwrap_or(&tx.recipient.to_string()) }</td>
-                      <td style="padding: 0 2px;">{ tx.amount } { "💶" }</td>
+                      <td style="padding: 0 2px;">{ tx.amount } { " ₳" }</td>
                   </tr>
                 }) }
             </table>
