@@ -164,7 +164,6 @@ impl Component for NewAccount {
 
             <style> { "
                 .boxes {
-                    position: absolute;
                     width: 20em; height: 10em;
                     margin-left: 10em;
                     z-index: -1;
@@ -173,12 +172,13 @@ impl Component for NewAccount {
                 }
 
                 .boxes > * {
-                    position: absolute;
+                    position: relative;
                     margin: 0px;
 
                     background-color: white;
                     border: solid;
                     padding: 1em 2em;
+                    width: 2em;
                 }
                 @media (prefers-color-scheme: dark) {
                     .boxes > * {
@@ -190,10 +190,10 @@ impl Component for NewAccount {
                     top: -2em; left: -4em;
                 }
                 .boxes > :nth-child(2) {
-                    top: -2em; left: 20em;
+                    top: -6em; left: 20em;
                 }
                 .boxes > :nth-child(3) {
-                    top: 10em; left: 8em;
+                    top: 2em; left: 8em;
                 }
             " } </style>
 
