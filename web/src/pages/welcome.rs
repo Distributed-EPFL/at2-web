@@ -23,8 +23,10 @@ impl Component for Welcome {
             <h1> { "Welcome to AT2" } </h1>
 
             <p>
-                <a href="https://factory.c4dt.org/showcase/at2"> { "AT2" } </a>
-                { " is a research project developed at Prof. Rachid Guerraoui's " }
+                <a href="https://factory.c4dt.org/showcase/at2">
+                    { "Asynchronous Trustworthy Transfer" }
+                </a> { " (AT2) is a research project developed at
+                Prof. Rachid Guerraoui's " }
                 <a href="https://dcl.epfl.ch"> { "Distributed Computing Lab" } </a>
                 { ", at EPFL.
                 It stands for Asynchronous Trustworthy Transfer, it is a
@@ -33,7 +35,9 @@ impl Component for Welcome {
                 It is quite close to Bitcoin in its capabilities, while
                 being orders of magnitudes faster and consuming much less
                 energy.
-                It achieves such speed by avoiding to synchronize a common
+                " } </p>
+            <p> { "
+                AT2 achieves such speed by avoiding to synchronize a common
                 state, the global consensus, in favor of using a local
                 consensus, that usually isn't the same at every node but does
                 converge to a common state.

@@ -20,22 +20,21 @@ impl Component for Summary {
 
     fn view(&self) -> Html {
         html! { <>
-            <h1> { "Summary" } </h1>
+            <h1> { "Further informations" } </h1>
 
             <p> { "
                 We showed that AT2 is behaving as any other blockchain.
-                You can send asset with it, see other users on the network
-                and see the latest processed transactions.
-                But using a speedtest really uncovers the true power of AT2:
-                it is faster than other most popular blockchains, beating " }
+                It can send asset, show other accounts on the network
+                and watch the latest processed transactions.
+                But using a speedtest reveals the true power of AT2:
+                it is faster than other two most popular blockchains, beating " }
                 <a href="https://bitcoin.org"> { "Bitcoin" } </a>
                 { " and " }
                 <a href="https://ethereum.org"> { "Ethereum" } </a>
                 { " by a factor of 10.
-                It achieves that speed by avoiding to sync a common state,
-                the global consensus. It uses a local one, allowing nodes
-                to validate transactions before checking them with every other
-                node on the network.
+                It achieves that speed by avoiding to synchronize a common state,
+                the global consensus. It uses a local one, allowing the network
+                to validate transactions before checking them with every node.
             " } </p>
 
             <p> { "
@@ -43,15 +42,18 @@ impl Component for Summary {
                 browser, one can imagine using it directly as a means of
                 payment, having a little button \"pay with AT2\" next to the
                 credit cards.
-                Or you can use AT2 directly as a means of communication, an
+                It can also be used as a means of communication, an
                 instant chat ensuring that no rogue participant can interfere
                 or reorder the messages.
             " } </p>
 
             <p> { "
-                Most blockchains are still using the global consensus method,
-                but AT2's paper demonstrates that this is unnecessary to
-                transfer asset within a network.
+                Most blockchains still uses the global consensus method,
+                but " }
+                <a href="https://arxiv.org/abs/1812.10844">
+                    { "AT2's research paper" }
+                </a> { " demonstrates that this is unnecessary to transfer asset
+                within a network, one only need local consensus to do so.
                 For the sake of transparency, there is another project based
                 on a similar technology, " }
                 <a href="https://www.avax.network/"> { "Avalanche" } </a> { ",
@@ -60,7 +62,7 @@ impl Component for Summary {
                 <a href="https://factory.c4dt.org/showcase/carbon">
                     { "Carbon" }
                 </a> { ", the next iteration of AT2, aims to support it, with
-                many added features, such as minting and a dynamic network.
+                many added features, such as asset creation and a dynamic network.
             " } </p>
 
             <p> { "
@@ -69,8 +71,8 @@ impl Component for Summary {
                     { "the project page" }
                 </a> { "
                 and contact the "
-                } <a href="mailto:factory@c4dt.org"> { "C4DT" } </a> { ",
-                we will be pleased to discuss it with you in greater details."
+                } <a href="mailto:factory@c4dt.org"> { "C4DT" } </a> { ".
+                We will be pleased to discuss it with you further."
             } </p>
         </> }
     }
