@@ -140,7 +140,7 @@ impl Component for SendTransactionDialog {
                             label="Balance:"
                             align_end=true
                         > { self.current_user_balance
-                            .map(|balance| html! { format!("{}💶", balance) })
+                            .map(|balance| html! { format!("{} ₳", balance) })
                             .unwrap_or(html! { <span style="color: lightgrey"> { "fetching" } </span> }) }
                         </MatFormfield>
                     </MatListItem>
