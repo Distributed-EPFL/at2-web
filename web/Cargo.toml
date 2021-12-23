@@ -16,19 +16,18 @@ gloo-timers = "0.2"
 http = "0.2"
 js-sys = "0.3"
 names = "0.12"
-rand = "0.8"
 snafu = "0.6"
 wasm-bindgen-futures = "0.4"
 yew = "0.18"
 [dependencies.material-yew]
 version = "0.1"
 features = [
-	"button",
-	"dialog",
-	"list",
-	"formfield",
-	"linear-progress",
-	"textfield",
+  "button",
+  "dialog",
+  "formfield",
+  "linear-progress",
+  "list",
+  "textfield",
 ]
 
 [build-dependencies]

@@ -1,4 +1,5 @@
 mod new_account;
+mod select_user;
 mod speedtest;
 mod style;
 mod summary;

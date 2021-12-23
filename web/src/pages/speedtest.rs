@@ -1,12 +1,10 @@
-use std::collections::HashMap;
-
 use at2_ns::{Contact, User};
 use chrono::{offset::Local, DateTime, Duration};
 use gloo_timers::callback::{Interval, Timeout};
 use material_yew::{MatButton, MatFormfield, MatLinearProgress, MatList, MatListItem};
-use rand::{seq::SliceRandom, thread_rng};
-use yew::{prelude::*, services::ConsoleService, worker::Agent};
+use yew::{prelude::*, worker::Agent};
 
+use super::select_user::SelectUser;
 use crate::agents;
 
 const TRANSFER_PER_REFRESH: usize = 50;
@@ -27,15 +25,10 @@ pub struct Speedtest {
     link: ComponentLink<Self>,
     props: Properties,
 
-    #[allow(dead_code)] // never dropped
-    users_agent: Box<dyn Bridge<agents::GetUsers>>,
     send_asset_agent: Box<dyn Bridge<agents::SendAsset>>,
 
-    sorted_usernames: Vec<String>,
-    username_to_user: HashMap<String, Contact>,
-
     amount: String,
-    to_username: Option<String>,
+    to_user: Option<Contact>,
 
     state: State,
     #[allow(dead_code)] // never dropped
@@ -59,15 +52,14 @@ pub enum State {
 
 pub enum Message {
     TransactionSent(<agents::SendAsset as Agent>::Output),
-    GotUsers(<agents::GetUsers as Agent>::Output),
     GotLastSequence(<agents::GetLastSequence as Agent>::Output),
 
     UpdateTransactionAmount(String),
-    UpdateUser(String),
+    SelectUser(Contact),
 
     Start,
     Running {
-        users_to_send_to: Vec<Contact>,
+        user_to_send_to: Contact,
         remaining: usize,
     },
 }
@@ -77,7 +69,6 @@ impl Component for Speedtest {
     type Message = Message;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let users_agent = agents::GetUsers::bridge(link.callback(Self::Message::GotUsers));
         let send_asset_agent =
             agents::SendAsset::bridge(link.callback(Self::Message::TransactionSent));
 
@@ -89,14 +80,10 @@ impl Component for Speedtest {
             link,
             props,
 
-            users_agent,
             send_asset_agent,
 
-            sorted_usernames: Vec::new(),
-            username_to_user: HashMap::new(),
-
             amount: "1000".to_owned(),
-            to_username: None,
+            to_user: None,
 
             state: State::Idle,
             last_sequence_refresher: Interval::new(100, move || {
@@ -117,22 +104,6 @@ impl Component for Speedtest {
                 }
             }
 
-            Self::Message::GotUsers(users) => {
-                let mut sorted_usernames = users
-                    .iter()
-                    .map(|user| user.name.clone())
-                    .collect::<Vec<_>>();
-                sorted_usernames.sort_unstable();
-                self.sorted_usernames = sorted_usernames;
-
-                self.username_to_user = users
-                    .iter()
-                    .cloned()
-                    .map(|user| (user.name.clone(), user))
-                    .collect();
-
-                true
-            }
             Self::Message::GotLastSequence(ret) => {
                 if let State::Started {
                     started_at,
@@ -142,10 +113,6 @@ impl Component for Speedtest {
                 } = &mut self.state
                 {
                     if let Ok(seq) = ret {
-                        ConsoleService::info(&format!(
-                            "got last sequence: confirmed_tx={} seq={} base_seq={}",
-                            confirmed_tx, seq, self.props.user.1
-                        ));
                         *confirmed_tx = (seq - self.props.user.1) as usize;
 
                         if confirmed_tx == total_tx {
@@ -165,37 +132,32 @@ impl Component for Speedtest {
                 self.amount = amount;
                 false
             }
-            Self::Message::UpdateUser(username) => {
-                self.to_username = Some(username);
+            Self::Message::SelectUser(username) => {
+                self.to_user = Some(username);
                 false
             }
 
             Self::Message::Start => {
                 if let Some(total_tx) = validate_amount(&self.amount) {
-                    self.state = State::Started {
-                        started_at: Local::now(),
-                        sent_tx: 0,
-                        confirmed_tx: 0,
-                        total_tx,
-                    };
+                    if let Some(user_to_send_to) = self.to_user.clone() {
+                        self.state = State::Started {
+                            started_at: Local::now(),
+                            sent_tx: 0,
+                            confirmed_tx: 0,
+                            total_tx,
+                        };
 
-                    let users_to_send_to = self
-                        .to_username
-                        .as_ref()
-                        .and_then(|username| self.username_to_user.get(username))
-                        .map(|user| vec![user.clone()])
-                        .unwrap_or_else(|| self.username_to_user.values().cloned().collect());
-
-                    self.link.send_message(Self::Message::Running {
-                        users_to_send_to,
-                        remaining: total_tx,
-                    });
+                        self.link.send_message(Self::Message::Running {
+                            user_to_send_to,
+                            remaining: total_tx,
+                        });
+                    }
                 }
 
                 true
             }
             Self::Message::Running {
-                users_to_send_to,
+                user_to_send_to,
                 mut remaining,
             } => {
                 if let State::Started { total_tx, .. } = self.state {
@@ -210,7 +172,7 @@ impl Component for Speedtest {
                         self.send_asset_agent.send((
                             sender.clone(),
                             sequence,
-                            users_to_send_to.choose(&mut thread_rng()).unwrap().clone(), // can't be empty
+                            user_to_send_to.clone(), // can't be empty
                             1,
                         ));
                     }
@@ -221,7 +183,7 @@ impl Component for Speedtest {
                         // trigger refresh
                         Timeout::new(0, move || {
                             callback.emit(Self::Message::Running {
-                                users_to_send_to,
+                                user_to_send_to,
                                 remaining,
                             })
                         })
@@ -277,17 +239,9 @@ impl Component for Speedtest {
 
                 <MatListItem>
                     <MatFormfield label="To whom to send to" align_end=true>
-                        <select
-                            onchange=self.link.callback(|event: ChangeData| match event {
-                                ChangeData::Select(elem) => Self::Message::UpdateUser(elem.value()),
-                                _ => unreachable!(),
-                            })
-                        >
-                            <option>{ "Anyone" }</option>
-                            { for self.sorted_usernames.iter().map(|username| html! {
-                                <option>{ username.clone() }</option>
-                            }) }
-                        </select>
+                        <SelectUser
+                            user_selected=self.link.callback(Message::SelectUser)
+                        />
                     </MatFormfield>
                 </MatListItem>
 
