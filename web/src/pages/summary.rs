@@ -28,9 +28,9 @@ impl Component for Summary {
                 and watch the latest processed transactions.
                 But using a speedtest reveals the true power of AT2:
                 it is faster than other two most popular blockchains, beating " }
-                <a href="https://bitcoin.org"> { "Bitcoin" } </a>
+                <a href="https://bitcoin.org" target="_blank"> { "Bitcoin" } </a>
                 { " and " }
-                <a href="https://ethereum.org"> { "Ethereum" } </a>
+                <a href="https://ethereum.org" target="_blank"> { "Ethereum" } </a>
                 { " by a factor of 10.
                 It achieves that speed by avoiding to synchronize a common state,
                 the global consensus. It uses a local one, allowing the network
@@ -50,16 +50,16 @@ impl Component for Summary {
             <p> { "
                 Most blockchains still uses the global consensus method,
                 but " }
-                <a href="https://arxiv.org/abs/1812.10844">
+                <a href="https://arxiv.org/abs/1812.10844" target="_blank">
                     { "AT2's research paper" }
                 </a> { " demonstrates that this is unnecessary to transfer asset
                 within a network, one only need local consensus to do so.
                 For the sake of transparency, there is another project based
                 on a similar technology, " }
-                <a href="https://www.avax.network/"> { "Avalanche" } </a> { ",
+                <a href="https://www.avax.network/" target="_blank"> { "Avalanche" } </a> { ",
                 which is already used to run Ethereum-compatible smart contracts.
                 Currently, AT2 doesn't allow it but " }
-                <a href="https://factory.c4dt.org/showcase/carbon">
+                <a href="https://factory.c4dt.org/showcase/carbon" target="_blank">
                     { "Carbon" }
                 </a> { ", the next iteration of AT2, aims to support it, with
                 many added features, such as asset creation and a dynamic network.
@@ -67,7 +67,7 @@ impl Component for Summary {
 
             <p> { "
                 If you are interested in exploring this technology more, look at " }
-                <a href="https://factory.c4dt.org/showcase/at2">
+                <a href="https://factory.c4dt.org/showcase/at2" target="_blank">
                     { "the project page" }
                 </a> { "
                 and contact the "

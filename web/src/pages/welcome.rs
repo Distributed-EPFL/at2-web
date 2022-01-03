@@ -23,11 +23,11 @@ impl Component for Welcome {
             <h1> { "Welcome to AT2" } </h1>
 
             <p>
-                <a href="https://factory.c4dt.org/showcase/at2">
+                <a href="https://factory.c4dt.org/showcase/at2" target="_blank">
                     { "Asynchronous Trustworthy Transfer" }
                 </a> { " (AT2) is a research project developed at
                 Prof. Rachid Guerraoui's " }
-                <a href="https://dcl.epfl.ch"> { "Distributed Computing Lab" } </a>
+                <a href="https://dcl.epfl.ch" target="_blank"> { "Distributed Computing Lab" } </a>
                 { ", at EPFL.
                 It stands for Asynchronous Trustworthy Transfer, it is a
                 new way to transfer assets (such as coins) throughout a
