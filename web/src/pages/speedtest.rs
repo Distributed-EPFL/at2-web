@@ -218,7 +218,7 @@ impl Component for Speedtest {
                 your transactions on the network directly as you would do in
                 a more realistic use case. It means that the TPS measured here
                 is below the speed reported in the " }
-                <a href="https://arxiv.org/abs/1812.10844"> { "research paper" } </a>
+                <a href="https://arxiv.org/abs/1812.10844" target="_blank"> { "research paper" } </a>
                 { "." }
              </p>
 
