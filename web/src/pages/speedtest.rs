@@ -1,7 +1,7 @@
 use at2_ns::{Contact, User};
 use chrono::{offset::Local, DateTime, Duration};
 use gloo_timers::callback::{Interval, Timeout};
-use material_yew::{MatButton, MatFormfield, MatLinearProgress, MatList, MatListItem};
+use material_yew::{MatButton, MatLinearProgress};
 use yew::{prelude::*, worker::Agent};
 
 use super::select_user::SelectUser;
@@ -224,37 +224,37 @@ impl Component for Speedtest {
 
             <hr />
 
-            <MatList>
-                <MatListItem>
-                    <MatFormfield label="How many transactions to send" align_end=true>
-                        <input
-                            oninput=self.link.callback(|event: InputData|
-                                Self::Message::UpdateTransactionAmount(event.value))
-                            value=self.amount.clone()
-                            min=1
-                            type={ "number" }
-                        />
-                    </MatFormfield>
-                </MatListItem>
+            <span style=concat!(
+                "display: flex;",
+                "align-items: center;",
+            )>
 
-                <MatListItem>
-                    <MatFormfield label="To whom to send to" align_end=true>
-                        <SelectUser
-                            user_selected=self.link.callback(Message::SelectUser)
-                        />
-                    </MatFormfield>
-                </MatListItem>
+                <label>
+                    { "How many transactions to send " }
+                    <input
+                        oninput=self.link.callback(|event: InputData|
+                            Self::Message::UpdateTransactionAmount(event.value))
+                        value=self.amount.clone()
+                        min=1
+                        type={ "number" }
+                    />
+                </label>
 
-                <MatListItem>
-                    <span
-                        onclick=self.link.callback(|_| Self::Message::Start)
-                    ><MatButton
-                        label="Launch"
-                        raised=true
-                        disabled=matches!(self.state, State::Started { .. }) || validate_amount(&self.amount).is_none()
-                    /></span>
-                </MatListItem>
-            </MatList>
+                <label>
+                    { "To whom to send to " }
+                    <SelectUser
+                        user_selected=self.link.callback(Message::SelectUser)
+                    />
+                </label>
+
+                <span
+                    onclick=self.link.callback(|_| Self::Message::Start)
+                ><MatButton
+                    label="Launch"
+                    raised=true
+                    disabled=matches!(self.state, State::Started { .. }) || validate_amount(&self.amount).is_none()
+                /></span>
+            </span>
 
             <hr />
 
