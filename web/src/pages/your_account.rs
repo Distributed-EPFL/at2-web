@@ -5,7 +5,7 @@ use at2_ns::{Contact, User};
 use chrono::Utc;
 use chrono_humanize::HumanTime;
 use drop::crypto::sign;
-use material_yew::{MatButton, MatFormfield, MatList, MatListItem};
+use material_yew::{MatButton, MatFormfield};
 use yew::{prelude::*, worker::Agent};
 
 use super::select_user::SelectUser;
@@ -195,19 +195,21 @@ impl Component for YourAccount {
 
             <h2> { "Send assets" } </h2>
 
+            <span style=concat!(
+                "display: flex;",
+                "flex-direction: column;",
+                "justify-content: space-around;",
+            )>
+                <p>
+                    { "Your balance: " }
+                    { self.user_balance
+                        .map(|balance| html! { format!("{} ₳", balance) })
+                        .unwrap_or(html! { <span style="color: lightgrey"> { "fetching" } </span> }) }
+                </p>
 
-            <MatList>
-                <MatListItem>
-                    <p>
-                        { "Your balance: " }
-                        { self.user_balance
-                            .map(|balance| html! { format!("{} ₳", balance) })
-                            .unwrap_or(html! { <span style="color: lightgrey"> { "fetching" } </span> }) }
-                    </p>
-                </MatListItem>
-
-                <MatListItem>
-                    <MatFormfield label="Amount to send" align_end=true>
+                <span>
+                    <label>
+                        { "Send " }
                         <input
                             oninput=self.link.callback(|event: InputData|
                                 Message::UpdateAmount(event.value))
@@ -215,27 +217,26 @@ impl Component for YourAccount {
                             min=1
                             type={ "number" }
                         />
-                    </MatFormfield>
-                </MatListItem>
+                    </label>
 
-                <MatListItem>
-                    <MatFormfield label="To whom to send to" align_end=true>
+                    { " ₳ " }
+
+                    <MatFormfield label="to" align_end=true>
                         <SelectUser
                             user_selected=self.link.callback(Message::SelectUser)
                         />
                     </MatFormfield>
-                </MatListItem>
+                </span>
 
-                <MatListItem>
-                    <span
-                        onclick=self.link.callback(|_| Message::SendTransaction)
-                    ><MatButton
-                        label="Launch"
-                        raised=true
-                        disabled=validate_amount(&self.user_balance, &self.amount_to_send).is_none()
-                    /></span>
-                </MatListItem>
-            </MatList>
+                <span
+                    onclick=self.link.callback(|_| Message::SendTransaction)
+                    style="padding: 1em 0"
+                ><MatButton
+                    label="Send"
+                    raised=true
+                    disabled=validate_amount(&self.user_balance, &self.amount_to_send).is_none()
+                /></span>
+            </span>
 
             <hr />
 
