@@ -5,6 +5,7 @@ use at2_ns::{Contact, User};
 use chrono::Utc;
 use chrono_humanize::HumanTime;
 use drop::crypto::sign;
+use gloo_timers::callback::Interval;
 use material_yew::{MatButton, MatFormfield};
 use yew::{prelude::*, worker::Agent};
 
@@ -37,6 +38,8 @@ pub struct YourAccount {
     #[allow(dead_code)] // never dropped
     get_users_agent: Box<dyn Bridge<agents::GetUsers>>,
     pubkey_to_username: HashMap<sign::PublicKey, String>,
+    #[allow(dead_code)] // never dropped
+    refresher: Interval,
 }
 
 pub enum Message {
@@ -49,6 +52,7 @@ pub enum Message {
 
     LatestTransactionsGot(<agents::GetLatestTransactions as Agent>::Output),
     GotUsers(<agents::GetUsers as Agent>::Output),
+    Refresh,
 }
 
 fn validate_amount(max: &Option<u64>, amount: &str) -> Option<u64> {
@@ -76,6 +80,8 @@ impl Component for YourAccount {
         let mut get_balance_agent = agents::GetBalance::bridge(link.callback(Message::GotBalance));
         get_balance_agent.send(props.user.0.clone().to_thin());
 
+        let refresh = link.callback(|_: ()| Message::Refresh);
+
         Self {
             link,
             props,
@@ -91,6 +97,9 @@ impl Component for YourAccount {
             latest_transactions: Vec::new(),
             get_users_agent,
             pubkey_to_username: HashMap::new(),
+            refresher: Interval::new(1000, move || {
+                refresh.emit(());
+            }),
         }
     }
 
@@ -158,6 +167,8 @@ impl Component for YourAccount {
 
                 true
             }
+
+            Message::Refresh => true,
         }
     }
 
