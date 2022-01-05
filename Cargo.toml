@@ -1,3 +1,6 @@
 [workspace]
 members = ["at2-ns", "web"]
 resolver = "2"
+
+[patch.crates-io]
+material-yew = { git = "https://github.com/c4dt/material-yew", branch = "fix-select" }

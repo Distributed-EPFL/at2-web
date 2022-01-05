@@ -1,6 +1,10 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, iter};
 
 use at2_ns::Contact;
+use material_yew::{
+    select::{ListIndex, SelectedDetail},
+    MatListItem, MatSelect,
+};
 use yew::{prelude::*, worker::Agent};
 
 use crate::agents;
@@ -48,8 +52,6 @@ impl Component for SelectUser {
     fn update(&mut self, message: Message) -> ShouldRender {
         match message {
             Message::GotUsers(users) => {
-                let was_empty = self.sorted_usernames.is_empty();
-
                 let mut sorted_usernames = users
                     .iter()
                     .map(|user| user.name.clone())
@@ -62,10 +64,6 @@ impl Component for SelectUser {
                     .cloned()
                     .map(|user| (user.name.clone(), user))
                     .collect();
-
-                if was_empty {
-                    self.link.send_message(Message::SelectUsername(0));
-                }
 
                 true
             }
@@ -89,16 +87,18 @@ impl Component for SelectUser {
 
     fn view(&self) -> Html {
         html! {
-            <select
-                onchange=self.link.callback(|event: ChangeData| match event {
-                    ChangeData::Select(elem) => Message::SelectUsername(elem.selected_index() as usize),
+            <MatSelect
+                onselected=self.link.callback(|detail: SelectedDetail| match detail.index {
+                    ListIndex::Single(Some(elem)) => Message::SelectUsername(elem),
                     _ => unreachable!(),
                 })
             >
-                { self.sorted_usernames.iter().map(|username| html! {
-                    <option>{ username.clone() }</option>
+                { self.sorted_usernames.iter()
+                    .zip(iter::once(true).chain(iter::repeat(false)))
+                    .map(|(username, selected)| html! {
+                    <MatListItem selected=selected>{ username.clone() }</MatListItem>
                 }).collect::<Html>() }
-            </select>
+            </MatSelect>
         }
     }
 }
