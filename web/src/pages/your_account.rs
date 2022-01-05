@@ -189,13 +189,8 @@ impl Component for YourAccount {
                 assets.
             " } <br /> { "
                 Below, you can play by sending some asset to the other accounts
-                of the network. Click on any name, send some asset and see your
-                transaction being validated.
-            " } <br /> { "
-                The ten most recent transactions on the network will appear
-                below, with the most recent on top.
-                If you see it changing rapidly, that's probably because
-                someone else is running a speedtest.
+                of the network.
+                You can also see the transactions currently happening on the network.
             " } <br /> { "
                 If you don't see your transactions, or that one fails, please " }
                 <a href="mailto:factory@c4dt.org"> { "contact the C4DT" } </a>
@@ -206,18 +201,25 @@ impl Component for YourAccount {
 
             <h2> { "Send assets" } </h2>
 
+            <p>{ "
+                Here, you can send some amount of asset to another account.
+                Select the amount and the account to send to,
+                click on the button and see your transaction being validated.
+            " }</p>
+
+            <p>
+                { "Your balance: " }
+                { self.user_balance
+                    .map(|balance| html! { format!("{} ₳", balance) })
+                    .unwrap_or(html! { <span style="color: lightgrey"> { "fetching" } </span> }) }
+            </p>
+
+
             <span style=concat!(
                 "display: flex;",
                 "flex-direction: column;",
                 "justify-content: space-around;",
             )>
-                <p>
-                    { "Your balance: " }
-                    { self.user_balance
-                        .map(|balance| html! { format!("{} ₳", balance) })
-                        .unwrap_or(html! { <span style="color: lightgrey"> { "fetching" } </span> }) }
-                </p>
-
                 <span>
                     <label>
                         { "Send " }
@@ -252,6 +254,13 @@ impl Component for YourAccount {
             <hr />
 
             <h2> { "Transactions" } </h2>
+
+            <p>{ "
+                The ten most recent transactions on the network will appear
+                below, with the most recent on top.
+                If you see it changing rapidly, that's probably because
+                someone else is running a speedtest.
+            " }</p>
 
             <table style=concat!(
                 "width: 100%;",
