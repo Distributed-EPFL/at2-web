@@ -209,6 +209,14 @@ impl Component for Speedtest {
                 One of the most interesting features of AT2 is that it allows
                 for many more transactions per second (TPS) than the two most
                 popular blockchains, such as Bitcoin or Ethereum.
+                Indeed, it scales in " }
+                <code class="math">{ "log(#nodes)" }</code>
+                { " meaning that when you exponentially increase the number of
+                nodes, it only linearly reduce the TPS. The two others chains
+                scale in " }
+                <code class="math">{ "#nodes" }</code>
+                { " meaning that doubling the nodes divide the TPS by two.
+            " } <br /> { "
                 Here you can actually test it, flooding the network with
                 transactions, and see how well it compares to the two.
             " } <br /> { "
