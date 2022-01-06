@@ -178,6 +178,15 @@ impl Component for Pages {
             .page > p {
                 text-align: justify;
             }
+
+            .math {
+                  background: var(--light-grey);
+            }
+            @media (prefers-color-scheme: dark) {
+                .math {
+                  background: black;
+                }
+            }
             " } </style>
 
             <div class=classes!("page") hidden=self.index != 0>
