@@ -104,7 +104,7 @@ impl Component for NewAccount {
             <p> { "
                 Here, you can create your own account.
                 It will automatically be credited with a fixed amount of
-                asset that you can pass around.
+                assets that you can pass around.
                 This account is stored in your browser, so if you
                 clear your websites' data, you won't be able to access it
                 again (but you can recreate a new one).
