@@ -24,7 +24,7 @@ impl Component for Summary {
 
             <p> { "
                 We showed that AT2 is behaving as any other blockchain.
-                It can send asset, show other accounts on the network
+                It can send assets, show other accounts on the network
                 and watch the latest processed transactions.
                 But using a speedtest reveals the true power of AT2:
                 it is faster than other two most popular blockchains, beating " }
@@ -52,7 +52,7 @@ impl Component for Summary {
                 but " }
                 <a href="https://arxiv.org/abs/1812.10844" target="_blank">
                     { "AT2's research paper" }
-                </a> { " demonstrates that this is unnecessary to transfer asset
+                </a> { " demonstrates that this is unnecessary to transfer assets
                 within a network, one only need local consensus to do so.
                 For the sake of transparency, there is another project based
                 on a similar technology, " }
@@ -62,7 +62,7 @@ impl Component for Summary {
                 <a href="https://factory.c4dt.org/showcase/carbon" target="_blank">
                     { "Carbon" }
                 </a> { ", the next iteration of AT2, aims to support it, with
-                many added features, such as asset creation and a dynamic network.
+                many added features, such as assets creation and a dynamic network.
             " } </p>
 
             <p> { "
