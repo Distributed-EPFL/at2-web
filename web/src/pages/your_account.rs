@@ -139,16 +139,12 @@ impl Component for YourAccount {
                     }
                 }
 
-                // TODO in background
                 self.get_balance_agent
                     .send(self.props.user.0.clone().to_thin());
 
                 false
             }
-            Message::TransactionSent(ret) => {
-                ret.unwrap(); // TODO send asset in dialog
-                false
-            }
+            Message::TransactionSent(_) => false,
 
             Message::LatestTransactionsGot(mut latest_transactions) => {
                 latest_transactions.reverse();
