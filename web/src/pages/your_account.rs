@@ -180,15 +180,16 @@ impl Component for YourAccount {
             <h1> { "Your account" } </h1>
 
             <p> { "
-                Now, your account is registered on the chain.
-                Same as Bitcoin, you have a wallet, to which we added 100'000
-                assets.
+                Now your account is registered on the chain.
+                Similar to Bitcoin, you have a wallet, to which we added 100'000
+                ₳ (assets).
             " } <br /> { "
-                Below, you can play by sending some assets to the other accounts
+                Below, you can send some assets to the other accounts
                 of the network.
-                You can also see the transactions currently happening on the network.
+                You can also see the transactions currently happening on the
+                network.
             " } <br /> { "
-                If you don't see your transactions, or that one fails, please " }
+                If you don't see your transactions, or one fails, please " }
                 <a href="mailto:factory@c4dt.org"> { "contact the C4DT" } </a>
                 { "." }
             </p>
@@ -198,7 +199,7 @@ impl Component for YourAccount {
             <h2> { "Send assets" } </h2>
 
             <p>{ "
-                Here, you can send some amount of assets to another account.
+                Here you can send some amount of assets to another account.
                 Select the amount and the account to send to,
                 click on the button and see your transaction being validated.
             " }</p>

@@ -48,12 +48,12 @@ impl Component for Summary {
             " } </p>
 
             <p> { "
-                Most blockchains still uses the global consensus method,
+                Most blockchains still use the global consensus method,
                 but " }
                 <a href="https://arxiv.org/abs/1812.10844" target="_blank">
                     { "AT2's research paper" }
                 </a> { " demonstrates that this is unnecessary to transfer assets
-                within a network, one only need local consensus to do so.
+                within a network, one only needs local consensus to do so.
                 For the sake of transparency, there is another project based
                 on a similar technology, " }
                 <a href="https://www.avax.network/" target="_blank"> { "Avalanche" } </a> { ",
@@ -72,7 +72,7 @@ impl Component for Summary {
                 </a> { "
                 and contact the "
                 } <a href="mailto:factory@c4dt.org"> { "C4DT" } </a> { ".
-                We will be pleased to discuss it with you further."
+                We're looking forward to have your input."
             } </p>
         </> }
     }
