@@ -105,13 +105,15 @@ impl Component for NewAccount {
                 Here, you can create your own account.
                 It will automatically be credited with a fixed amount of
                 assets that you can pass around.
-                This account is stored in your browser, so if you
-                clear your websites' data, you won't be able to access it
-                again (but you can recreate a new one).
-            " } <br /> { "
-                You can also see the various node of the test network we
-                have deployed below. This is where your transactions will
-                be run.
+                This account is " }
+                <b>{ "stored in your browser" }</b>
+                {", so if you clear your websites' data, you won't be able to
+                access it again (but you can recreate a new one).
+            " } <br />
+                { "You can also see the nodes of the " }
+                <b>{ "test network" }</b>
+                { " we have deployed below. This is where your transactions
+                will be run.
             " } <br /> { "
                 If you want to host your own node and participate to this
                 testnet, drop us an " }

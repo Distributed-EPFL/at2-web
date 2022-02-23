@@ -30,6 +30,9 @@ impl Component for Style {
                 line-height: 1.25rem;
                 font-weight: 400;
             }
+            b {
+                font-weight: bold;
+            }
             p, td {
                 font-size: 0.875rem;
             }
