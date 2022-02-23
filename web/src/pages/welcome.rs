@@ -29,8 +29,7 @@ impl Component for Welcome {
                 Prof. Rachid Guerraoui's " }
                 <a href="https://dcl.epfl.ch" target="_blank"> { "Distributed Computing Lab" } </a>
                 { ", at EPFL.
-                It stands for Asynchronous Trustworthy Transfer, it is a
-                new way to transfer assets (such as coins) throughout a
+                It is a new way to transfer assets (such as coins) throughout a
                 network of potentially rogue participants.
                 It is quite close to Bitcoin in its capabilities, while
                 being orders of magnitudes faster and consuming much less
