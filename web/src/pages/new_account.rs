@@ -112,7 +112,12 @@ impl Component for NewAccount {
                 You can also see the various node of the test network we
                 have deployed below. This is where your transactions will
                 be run.
-            " } </p>
+            " } <br /> { "
+                If you want to host your own node and participate to this
+                testnet, drop us an " }
+                <a href="mailto:factory@c4dt.org"> { "email" } </a>
+                { ", we will happily add you." }
+            </p>
 
             <hr />
 
