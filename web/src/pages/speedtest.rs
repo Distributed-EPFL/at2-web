@@ -312,33 +312,43 @@ impl Speedtest {
 
         const FIRST_COL: &str = "text-align: end; padding: 0 1em";
 
-        html! { <table>
-            <tr>
-                <td style=FIRST_COL> { "Transactions sent" } </td>
-                <td> { Speedtest::progress_bar(sent_tx as f32/total_tx as f32) } </td>
-            </tr>
-            <tr>
-                <td style=FIRST_COL> { "Transactions confirmed" } </td>
-                <td> { Speedtest::progress_bar(confirmed_tx as f32/total_tx as f32) } </td>
-            </tr>
+        html! { <>
+            <table>
+                <tr>
+                    <td style=FIRST_COL> { "Transactions sent" } </td>
+                    <td> { Speedtest::progress_bar(sent_tx as f32/total_tx as f32) } </td>
+                </tr>
+                <tr>
+                    <td style=FIRST_COL> { "Transactions confirmed" } </td>
+                    <td> { Speedtest::progress_bar(confirmed_tx as f32/total_tx as f32) } </td>
+                </tr>
 
-            <tr>
-                <td style=FIRST_COL> { "Running for" } </td>
-                <td> { format!("{:.1}s", elapsed.num_milliseconds() as f64 / 1000.0) } </td>
-            </tr>
+                <tr>
+                    <td style=FIRST_COL> { "Running for" } </td>
+                    <td> { format!("{:.1}s", elapsed.num_milliseconds() as f64 / 1000.0) } </td>
+                </tr>
 
-            <tr>
-                <td style=FIRST_COL> { "AT2's computed TPS" } </td>
-                <td> { tps.unwrap_or(0) } </td>
-            </tr>
-            <tr>
-                <td style=FIRST_COL> { "Bitcoin's TPS" } </td>
-                <td> { 7 } </td>
-            </tr>
-            <tr>
-                <td style=FIRST_COL> { "Ethereum's TPS" } </td>
-                <td> { 25 } </td>
-            </tr>
-        </table> }
+                <tr>
+                    <td style=FIRST_COL> { "AT2's computed TPS" } </td>
+                    <td> { tps.unwrap_or(0) } </td>
+                </tr>
+            </table>
+
+            <p style="text-align: center">
+            { " For reference, the next table shows the TPS of
+                other distributed ledgers." }
+            </p>
+
+            <table>
+                <tr>
+                    <td style=FIRST_COL> { "Bitcoin's TPS" } </td>
+                    <td> { 7 } </td>
+                </tr>
+                <tr>
+                    <td style=FIRST_COL> { "Ethereum's TPS" } </td>
+                    <td> { 25 } </td>
+                </tr>
+            </table>
+        </> }
     }
 }
