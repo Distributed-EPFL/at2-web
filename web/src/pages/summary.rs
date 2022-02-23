@@ -45,6 +45,9 @@ impl Component for Summary {
                 It can also be used as distributed instant chat, which by
                 construction ensures that no rogue participant can interfere
                 or reorder the messages.
+                One other application is verifiable voting: each participant
+                cast a public vote, that gets aggregated and validated by each
+                node, revealing the result only if the network agrees.
             " } </p>
 
             <p> { "
