@@ -183,12 +183,14 @@ impl Component for YourAccount {
                 Now your account is registered on the chain.
                 Similar to Bitcoin, you have a wallet, to which we added 100'000
                 ₳ (assets).
-            " } <br /> { "
-                Below, you can send some assets to the other accounts
-                of the network.
-                You can also see the transactions currently happening on the
-                network.
-            " } <br /> { "
+            " } <br />
+                { "Below, you can " }
+                <b>{ "send some assets" }</b>
+                { " to the other accounts of the network.
+                You can also see the " }
+                <b>{ "transactions currently happening" }</b>
+                { " on the network." }
+                <br /> { "
                 If you don't see your transactions, or one fails, please " }
                 <a href="mailto:factory@c4dt.org"> { "contact the C4DT" } </a>
                 { "." }

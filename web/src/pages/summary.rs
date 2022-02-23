@@ -22,16 +22,20 @@ impl Component for Summary {
         html! { <>
             <h1> { "Further informations" } </h1>
 
-            <p> { "
-                We showed that AT2 is behaving as any other blockchain.
-                It can send assets, show other accounts on the network
+            <p>
+                { "We showed that AT2 is behaving " }
+                <b>{ "as any other blockchain" }</b>
+                { ". It can send assets, show other accounts on the network
                 and watch the latest processed transactions.
                 But using a speedtest reveals the true power of AT2:
-                it is faster than other two most popular blockchains, beating " }
+                it is " }
+                <b>{ "faster" }</b>
+                { " than other two most popular blockchains, beating " }
                 <a href="https://bitcoin.org" target="_blank"> { "Bitcoin" } </a>
                 { " and " }
                 <a href="https://ethereum.org" target="_blank"> { "Ethereum" } </a>
-                { " by a factor of 10.
+                { " by a " }
+                <b>{ "factor of 10" }</b> { ".
                 It achieves that speed by avoiding to synchronize a common state,
                 the global consensus. It uses a local one, allowing the network
                 to validate transactions before checking them with every node.
