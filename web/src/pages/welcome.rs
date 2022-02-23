@@ -58,6 +58,8 @@ impl Component for Welcome {
                 speed test where you can send as many transactions as you
                 want and measure how well the network is handling the load.
             " } </p>
+
+            <img src="yacy-network.png" />
         </> }
     }
 }

@@ -178,6 +178,9 @@ impl Component for Pages {
             .page > p {
                 text-align: justify;
             }
+            .page > img {
+                width: inherit;
+            }
 
             .math {
                   background: var(--light-grey);
