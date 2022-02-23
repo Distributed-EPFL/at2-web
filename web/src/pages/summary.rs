@@ -42,8 +42,8 @@ impl Component for Summary {
                 browser, one can imagine using it directly as a means of
                 payment, having a little button \"pay with AT2\" next to the
                 credit cards.
-                It can also be used as a means of communication, an
-                instant chat ensuring that no rogue participant can interfere
+                It can also be used as distributed instant chat, which by
+                construction ensures that no rogue participant can interfere
                 or reorder the messages.
             " } </p>
 
